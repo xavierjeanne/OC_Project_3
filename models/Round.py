@@ -1,4 +1,5 @@
 from datetime import datetime
+from models.Match import Match
 
 
 class Round:
@@ -21,3 +22,11 @@ class Round:
             "start_time": self.start_time,
             "end_time": self.end_time
         }
+
+    @classmethod
+    def from_dict(cls, data):
+        round_instance = cls(data["name"])
+        round_instance.matches = [Match.from_dict(match) for match in data["matches"]]
+        round_instance.start_time = data["start_time"]
+        round_instance.end_time = data["end_time"]
+        return round_instance

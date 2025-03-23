@@ -7,3 +7,14 @@ class Player:
 
     def to_dict(self):
         return self.__dict__
+
+    @classmethod
+    def from_dict(cls, data):
+        if data is None:
+            return None
+        return cls(
+            last_name=data["last_name"],
+            first_name=data["first_name"],
+            birth_date=data["birth_date"],
+            national_id=data["national_id"]
+        )

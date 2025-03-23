@@ -1,0 +1,17 @@
+{
+    "players": {
+        "NO12346": {
+            "last_name": "Carlsen",
+            "first_name": "Magnus",
+            "birth_date": "1990-11-30",
+            "national_id": "NO12346"
+        },
+        "NO12345": {
+            "last_name": "Carlsened",
+            "first_name": "Magnuse",
+            "birth_date": "1990-11-30",
+            "national_id": "NO12345"
+        }
+    },
+    "tournaments": {}
+}
