@@ -1,4 +1,7 @@
-from controller.Controller import Controller
+from controllers.MainController import MainController
+import tkinter as tk
 
 if __name__ == "__main__":
-    Controller().run()
+    root = tk.Tk()
+    app = MainController(root)
+    root.mainloop()
