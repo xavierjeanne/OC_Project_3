@@ -8,7 +8,20 @@ from views.TournamentView import TournamentView
 
 
 class MainController:
+    """Main application controller managing views and sub-controllers"""
+
     def __init__(self, root):
+        """Initialize the main application controller
+
+        Args:
+            root: The root Tkinter window
+
+        Features:
+            - Sets up main window properties
+            - Initializes base view
+            - Creates and manages sub-controllers
+            - Manages view navigation
+        """
         self.root = root
         self.root.title("Chess Tournament Manager")
         self.root.geometry("1024x768")
@@ -21,12 +34,18 @@ class MainController:
 
         # Initialize views
         self.views = {}
-        self.views["home"] = HomeView(self.base_view.content_container,
-                                      self.home_controller)
-        self.views["players"] = PlayerView(self.base_view.content_container,
-                                           self.player_controller)
-        self.views["tournaments"] = TournamentView(self.base_view.content_container,
-                                                   self.tournament_controller)
+        self.views["home"] = HomeView(
+            self.base_view.content_container,
+            **self.home_controller.get_callbacks()
+        )
+        self.views["players"] = PlayerView(
+            self.base_view.content_container,
+            **self.player_controller.get_callbacks()
+        )
+        self.views["tournaments"] = TournamentView(
+            self.base_view.content_container,
+            **self.tournament_controller.get_callbacks()
+        )
 
         # Configure all views
         for view in self.views.values():
@@ -35,5 +54,10 @@ class MainController:
         self.show_view("home")
 
     def show_view(self, view_name):
-        """Switch to the specified view"""
+        """Switch to the specified view
+
+        Args:
+            view_name (str): Name of the view to display
+            ('home', 'players', or 'tournaments')
+        """
         self.views[view_name].tkraise()

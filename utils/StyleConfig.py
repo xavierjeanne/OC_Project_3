@@ -2,8 +2,21 @@ from tkinter import ttk
 
 
 class StyleConfig:
+    """Configures the visual styles for the application's UI components"""
+
     @staticmethod
     def configure_styles():
+        """Configure ttk styles for various UI elements
+
+        Defines styles for:
+        - Main frame (Main.TFrame)
+        - Custom buttons (Custom.TButton)
+        - Notebook and tabs (Custom.TNotebook)
+
+        Color scheme:
+        - Primary: #2C3E50 (Dark blue)
+        - Text: white
+        """
         style = ttk.Style()
 
         # Main frame style
@@ -15,10 +28,12 @@ class StyleConfig:
                         foreground='#2C3E50',
                         font=('Helvetica', 12, 'bold'),
                         padding=15)
+
         style.map('Custom.TButton',
                   background=[('active', '#2C3E50')],
                   foreground=[('active', '#2C3E50')])
 
+        # Notebook style
         style.configure('Custom.TNotebook',
                         background='#2C3E50',
                         foreground='white',

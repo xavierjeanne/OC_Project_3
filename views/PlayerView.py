@@ -3,14 +3,23 @@ from tkinter import ttk, messagebox
 
 
 class PlayerView(ttk.Frame):
-    def __init__(self, parent, controller):
+    """View for managing chess players,
+    including adding new players and viewing player list"""
+
+    def __init__(self, parent, **callbacks):
+        """Initialize the player management view
+
+        Args:
+            parent: Parent widget containing this view
+            callbacks: Dictionary containing callback functions for player operations
+        """
         super().__init__(parent, style='Main.TFrame')
-        self.controller = controller
+        self.callbacks = callbacks
 
         # Return button
         ttk.Button(self,
                    text="Retour à l'accueil",
-                   command=self.controller.return_home,
+                   command=self.callbacks.get('return_home'),
                    cursor='hand2',
                    style='Custom.TButton').grid(row=0, column=0, pady=10)
 
@@ -33,6 +42,14 @@ class PlayerView(ttk.Frame):
         self.grid_columnconfigure(0, weight=1)
 
     def _setup_add_player_tab(self):
+        """Set up the tab for adding new players
+
+        Creates a form with fields for:
+        - Last name
+        - First name
+        - Birth date
+        - National ID
+        """
         for i in range(5):
             self.add_player_frame.grid_rowconfigure(i, weight=1)
             self.add_player_frame.grid_columnconfigure(0, weight=1)
@@ -66,6 +83,13 @@ class PlayerView(ttk.Frame):
                    ).grid(row=4, column=0, columnspan=2, pady=20)
 
     def _setup_list_players_tab(self):
+        """Set up the tab for displaying the list of players
+
+        Features:
+        - Sortable columns
+        - Scrollable view
+        - Columns for ID, name, and birth date
+        """
         self.list_players_frame.grid_rowconfigure(0, weight=1)
         self.list_players_frame.grid_columnconfigure(0, weight=1)
 
@@ -96,6 +120,7 @@ class PlayerView(ttk.Frame):
         self.load_players()
 
     def save_player(self):
+        """Save new player data from the form"""
         player_data = {
             "last_name": self.entries["last_name"].get().strip(),
             "first_name": self.entries["first_name"].get().strip(),
@@ -103,7 +128,7 @@ class PlayerView(ttk.Frame):
             "national_id": self.entries["national_id"].get().strip()
         }
 
-        success, message = self.controller.save_player(player_data)
+        success, message = self.callbacks.get('save_player')(player_data)
         if success:
             messagebox.showinfo("Succès", message)
             for entry in self.entries.values():
@@ -114,10 +139,11 @@ class PlayerView(ttk.Frame):
             messagebox.showerror("Erreur", message)
 
     def load_players(self):
+        """Load and display all players in the table"""
         for item in self.players_table.get_children():
             self.players_table.delete(item)
 
-        players = self.controller.load_players()
+        players = self.callbacks.get('load_players')()
         for national_id, player_data in players.items():
             self.players_table.insert(
                 "",

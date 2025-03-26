@@ -3,14 +3,24 @@ from tkinter import ttk, messagebox
 
 
 class TournamentView(ttk.Frame):
-    def __init__(self, parent, controller):
+    """View for managing chess tournaments,
+    including creation and management of tournaments"""
+
+    def __init__(self, parent, **callbacks):
+        """Initialize the tournament management view
+
+        Args:
+            parent: Parent widget containing this view
+            callbacks: Dictionary containing
+            callback functions for tournament operations
+        """
         super().__init__(parent, style='Main.TFrame')
-        self.controller = controller
+        self.callbacks = callbacks
 
         # Return button
         ttk.Button(self,
                    text="Retour à l'accueil",
-                   command=self.controller.return_home,
+                   command=self.callbacks.get('return_home'),
                    style='Custom.TButton').grid(row=0, column=0, pady=10)
 
         # Create notebook
@@ -31,6 +41,15 @@ class TournamentView(ttk.Frame):
         self.grid_columnconfigure(0, weight=1)
 
     def _setup_create_tournament_tab(self):
+        """Set up the tab for creating new tournaments
+
+        Creates a form with fields for:
+        - Tournament name
+        - Location
+        - Start/End dates
+        - Number of rounds
+        - Description
+        """
         fields = [
             ("Nom du tournoi:", "name"),
             ("Lieu:", "location"),
@@ -60,6 +79,14 @@ class TournamentView(ttk.Frame):
                                                 pady=20)
 
     def _setup_list_tournaments_tab(self):
+        """Set up the tab for displaying and managing tournaments
+
+        Features:
+        - Tournament list table
+        - Player addition functionality
+        - Tournament start option
+        - Status tracking
+        """
         columns = ("name", "location", "start_date", "status", "players")
         self.tournaments_table = ttk.Treeview(self.list_tournaments_frame,
                                               columns=columns,
@@ -110,7 +137,7 @@ class TournamentView(ttk.Frame):
             "description": self.entries["description"].get("1.0", tk.END).strip()
         }
 
-        success, message = self.controller.create_tournament(tournament_data)
+        success, message = self.callbacks.get('create_tournament')(tournament_data)
         if success:
             messagebox.showinfo("Succès", message)
             self.load_tournaments()
@@ -122,7 +149,7 @@ class TournamentView(ttk.Frame):
         for item in self.tournaments_table.get_children():
             self.tournaments_table.delete(item)
 
-        tournaments = self.controller.load_tournaments()
+        tournaments = self.callbacks.get('load_tournaments')()
         for tournament_id, tournament_data in tournaments.items():
             self.tournaments_table.insert(
                 "",
@@ -137,25 +164,20 @@ class TournamentView(ttk.Frame):
             )
 
     def add_players_to_tournament(self):
-        """Add players to selected tournament"""
         selected = self.tournaments_table.selection()
         if not selected:
             messagebox.showwarning("Sélection requise",
                                    "Veuillez sélectionner un tournoi")
             return
 
-        # Create player selection window
         selection_window = tk.Toplevel(self)
         selection_window.title("Ajouter des joueurs")
         selection_window.geometry("400x500")
 
-        # Players listbox with checkboxes
         players_frame = ttk.Frame(selection_window)
         players_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
 
-        # Get all players
-        players = self.controller.load_available_players()
-        # Create checkboxes for each player
+        players = self.callbacks.get('load_available_players')()
         self.player_vars = {}
         for player_id, player_data in players.items():
             var = tk.BooleanVar()
@@ -165,45 +187,37 @@ class TournamentView(ttk.Frame):
                             text=player_name,
                             variable=var).pack(anchor='w', pady=2)
 
-        # Add button
         ttk.Button(selection_window,
                    text="Ajouter les joueurs sélectionnés",
                    command=lambda: self._confirm_add_players(selected[0]),
                    style='Custom.TButton').pack(pady=10)
 
     def _confirm_add_players(self, tournament_id):
-        """Confirm and add selected players to tournament"""
         selected_players = [
             player_id for player_id, var in self.player_vars.items()
             if var.get()
         ]
-        if not selected_players:
-            messagebox.showwarning("Sélection requise",
-                                   "Veuillez sélectionner au moins un joueur")
-            return
-
-        success = self.controller.add_players_to_tournament(tournament_id,
-                                                            selected_players)
-        if success:
-            messagebox.showinfo("Succès", "Joueurs ajoutés au tournoi")
-            self.load_tournaments()
-        else:
-            messagebox.showerror("Erreur",
-                                 "Impossible d'ajouter les joueurs au tournoi.\n"
-                                 "Vérifiez que le tournoi n'a pas déjà commencé.")
+        if selected_players:
+            success, message = self.callbacks.get('add_players_to_tournament')(
+                tournament_id,
+                selected_players
+            )
+            if success:
+                messagebox.showinfo("Succès", message)
+                self.load_tournaments()
+            else:
+                messagebox.showerror("Erreur", message)
 
     def start_selected_tournament(self):
-        """Start the selected tournament"""
         selected = self.tournaments_table.selection()
         if not selected:
             messagebox.showwarning("Sélection requise",
                                    "Veuillez sélectionner un tournoi")
             return
 
-        tournament_id = selected[0]
-        success, message = self.controller.start_tournament(tournament_id)
+        success, message = self.callbacks.get('start_tournament')(selected[0])
         if success:
             messagebox.showinfo("Succès", message)
-            self.load_tournaments()  # Refresh the tournaments list
+            self.load_tournaments()
         else:
             messagebox.showerror("Erreur", message)

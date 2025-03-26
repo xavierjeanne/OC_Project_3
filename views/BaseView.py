@@ -4,10 +4,25 @@ from utils.StyleConfig import StyleConfig
 
 
 class BaseView:
+    """Base view class that sets up the main application window structure and styling"""
+
     def __init__(self, master):
+        """Initialize the base view with main frame and logo
+
+        Args:
+            master: The root window or parent widget
+
+        Features:
+            - Configures application styles
+            - Sets up responsive grid layout
+            - Loads and displays chess logo
+            - Creates content container for child views
+        """
+
         self.master = master
         StyleConfig.configure_styles()
 
+        # Configure grid weights
         self.master.grid_rowconfigure(0, weight=1)
         self.master.grid_columnconfigure(0, weight=1)
         # Create main frame
@@ -21,7 +36,7 @@ class BaseView:
 
         try:
             image = Image.open(
-                "c:/Users/xavie/Documents/OC_Project_3/assets/chess_logo.png"
+                "assets/chess_logo.png"
                 )
             image = image.resize((200, 200))
             self.photo = ImageTk.PhotoImage(image)  # Store as an instance attribute
@@ -39,6 +54,7 @@ class BaseView:
                                     foreground="white")
             placeholder.grid(row=1, column=0, pady=20)
 
+        # Content container for child views
         self.content_container = ttk.Frame(self.frame, style='Main.TFrame')
         self.content_container.grid(row=1, column=0, sticky="nsew", padx=20, pady=20)
         self.content_container.grid_rowconfigure(0, weight=1)
