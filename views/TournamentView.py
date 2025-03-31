@@ -50,6 +50,11 @@ class TournamentView(ttk.Frame):
         - Number of rounds
         - Description
         """
+        for i in range(7):
+            self.create_tournament_frame.grid_rowconfigure(i, weight=1)
+            self.create_tournament_frame.grid_columnconfigure(0, weight=1)
+            self.create_tournament_frame.grid_columnconfigure(1, weight=2)
+
         fields = [
             ("Nom du tournoi:", "name"),
             ("Lieu:", "location"),
@@ -62,21 +67,23 @@ class TournamentView(ttk.Frame):
         self.entries = {}
         for idx, (label_text, field_name) in enumerate(fields):
             ttk.Label(self.create_tournament_frame,
-                      text=label_text).grid(row=idx, column=0, padx=10, pady=5)
+                      text=label_text,
+                      style='Custom.TLabel').grid(row=idx,
+                                                  column=0,
+                                                  sticky='e',
+                                                  padx=10,
+                                                  pady=10)
             if field_name == "description":
-                entry = tk.Text(self.create_tournament_frame, height=4, width=40)
+                entry = tk.Text(self.create_tournament_frame, height=2, width=30)
             else:
                 entry = ttk.Entry(self.create_tournament_frame, width=40)
-            entry.grid(row=idx, column=1, padx=10, pady=5)
+            entry.grid(row=idx, column=1, sticky='w', padx=10, pady=10)
             self.entries[field_name] = entry
 
         ttk.Button(self.create_tournament_frame,
                    text="Créer le tournoi",
                    command=self.create_tournament,
-                   style='Custom.TButton').grid(row=len(fields),
-                                                column=0,
-                                                columnspan=2,
-                                                pady=20)
+                   style='Custom.TButton').grid(row=7, column=0, columnspan=2, pady=20)
 
     def _setup_list_tournaments_tab(self):
         """Set up the tab for displaying and managing tournaments
@@ -87,10 +94,14 @@ class TournamentView(ttk.Frame):
         - Tournament start option
         - Status tracking
         """
+        self.list_tournaments_frame.grid_rowconfigure(0, weight=1)
+        self.list_tournaments_frame.grid_columnconfigure(0, weight=1)
+
         columns = ("name", "location", "start_date", "status", "players")
         self.tournaments_table = ttk.Treeview(self.list_tournaments_frame,
                                               columns=columns,
-                                              show='headings')
+                                              show='headings',
+                                              style='Custom.Treeview')
 
         headers = {
             "name": "Nom",
@@ -101,7 +112,7 @@ class TournamentView(ttk.Frame):
         }
 
         for col, text in headers.items():
-            self.tournaments_table.heading(col, text=text)
+            self.tournaments_table.heading(col, text=text, anchor='nw')
             self.tournaments_table.column(col, width=150)
 
         self.tournaments_table.grid(row=0, column=0, sticky='nsew', padx=10, pady=10)

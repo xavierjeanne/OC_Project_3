@@ -23,7 +23,7 @@ class MainController:
             - Manages view navigation
         """
         self.root = root
-        self.root.title("Chess Tournament Manager")
+        self.root.title("Gestion de tournois d'échecs")
         self.root.geometry("1024x768")
         self.base_view = BaseView(root)
 

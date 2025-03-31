@@ -15,7 +15,7 @@ class PlayerView(ttk.Frame):
         """
         super().__init__(parent, style='Main.TFrame')
         self.callbacks = callbacks
-
+        self.edit_mode = False
         # Return button
         ttk.Button(self,
                    text="Retour à l'accueil",
@@ -72,7 +72,7 @@ class PlayerView(ttk.Frame):
                                                   padx=10,
                                                   pady=10)
 
-            entry = ttk.Entry(self.add_player_frame, width=30)
+            entry = ttk.Entry(self.add_player_frame, width=40)
             entry.grid(row=idx, column=1, sticky='w', padx=10, pady=10)
             self.entries[field_name] = entry
 
@@ -93,28 +93,38 @@ class PlayerView(ttk.Frame):
         self.list_players_frame.grid_rowconfigure(0, weight=1)
         self.list_players_frame.grid_columnconfigure(0, weight=1)
 
-        columns = ("national_id", "last_name", "first_name", "birth_date")
+        columns = ("national_id", "last_name", "first_name", "birth_date", "edit")
         self.players_table = ttk.Treeview(self.list_players_frame,
                                           columns=columns,
-                                          show='headings')
+                                          show='headings',
+                                          style='Custom.Treeview'
+                                          )
 
         headers = {
             "national_id": "ID National",
             "last_name": "Nom",
             "first_name": "Prénom",
-            "birth_date": "Date de naissance"
+            "birth_date": "Date de naissance",
+            "edit": "Éditer"
         }
 
         for col, text in headers.items():
-            self.players_table.heading(col, text=text)
-            self.players_table.column(col, width=150)
+            if col == "edit":
+                self.players_table.heading(col, text=text, anchor='center')
+                self.players_table.column(col, width=70, anchor='center')
+            else:
+                self.players_table.heading(col, text=text, anchor='nw')
+                self.players_table.column(col, width=150)
+
+        # Add click event binding
+        self.players_table.bind('<ButtonRelease-1>', self.handle_click)
 
         scrollbar = ttk.Scrollbar(self.list_players_frame,
                                   orient=tk.VERTICAL,
                                   command=self.players_table.yview)
         self.players_table.configure(yscroll=scrollbar.set)
 
-        self.players_table.grid(row=0, column=0, sticky='nsew', padx=10, pady=10)
+        self.players_table.grid(row=0, column=0, sticky='nsew')
         scrollbar.grid(row=0, column=1, sticky='ns')
 
         self.load_players()
@@ -128,15 +138,37 @@ class PlayerView(ttk.Frame):
             "national_id": self.entries["national_id"].get().strip()
         }
 
-        success, message = self.callbacks.get('save_player')(player_data)
+        success, message = self.callbacks.get('save_player')(player_data,
+                                                             self.edit_mode)
         if success:
             messagebox.showinfo("Succès", message)
             for entry in self.entries.values():
                 entry.delete(0, tk.END)
             self.load_players()
+            self.reset_form()
             self.notebook.select(1)
         else:
             messagebox.showerror("Erreur", message)
+
+    def handle_click(self, event):
+        """Handle click events on the players table"""
+        region = self.players_table.identify_region(event.x, event.y)
+        if region == "cell":
+            item = self.players_table.selection()[0]
+            column = self.players_table.identify_column(event.x)
+            if column == '#5':
+                values = self.players_table.item(item)['values']
+                self.fill_edit_form(values)
+
+    def fill_edit_form(self, values):
+        """Fill the add player form with existing values for editing"""
+        fields = ["national_id", "last_name", "first_name", "birth_date"]
+        for field, value in zip(fields, values):
+            self.entries[field].delete(0, tk.END)
+            self.entries[field].insert(0, value)
+
+        self.edit_mode = True
+        self.notebook.select(0)
 
     def load_players(self):
         """Load and display all players in the table"""
@@ -152,6 +184,13 @@ class PlayerView(ttk.Frame):
                     national_id,
                     player_data["last_name"],
                     player_data["first_name"],
-                    player_data["birth_date"]
+                    player_data["birth_date"],
+                    "✏️"  # Edit icon
                 )
             )
+
+    def reset_form(self):
+        """Reset the form to its initial state"""
+        for entry in self.entries.values():
+            entry.delete(0, tk.END)
+            self.edit_mode = False
