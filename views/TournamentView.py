@@ -86,6 +86,8 @@ class TournamentView(ttk.Frame):
                    command=self.save_tournament,
                    style='Custom.TButton').grid(row=7, column=0, columnspan=2, pady=20)
 
+    # In the _setup_list_tournaments_tab method, modify the tournament list display
+
     def _setup_list_tournaments_tab(self):
         """Set up the tab for displaying and managing tournaments
 
@@ -97,7 +99,8 @@ class TournamentView(ttk.Frame):
         self.list_tournaments_frame.grid_rowconfigure(0, weight=1)
         self.list_tournaments_frame.grid_columnconfigure(0, weight=1)
 
-        columns = ("name", "location", "start_date", "players", "edit")
+        # Update columns to include status
+        columns = ("name", "location", "status", "start_date", "players", "edit")
         self.tournaments_table = ttk.Treeview(self.list_tournaments_frame,
                                               columns=columns,
                                               show='headings',
@@ -106,6 +109,7 @@ class TournamentView(ttk.Frame):
         headers = {
             "name": "Nom",
             "location": "Lieu",
+            "status": "Statut",
             "start_date": "Date de début",
             "players": "Joueurs",
             "edit": "Editer"
@@ -139,7 +143,7 @@ class TournamentView(ttk.Frame):
                    command=self.add_players_to_tournament,
                    style='Custom.TButton').pack(side=tk.LEFT, padx=5)
         ttk.Button(btn_frame,
-                   text="Afficher les tours",
+                   text="Gestion du tournoi",
                    command=self.start_selected_tournament,
                    style='Custom.TButton').pack(side=tk.LEFT, padx=5)
 
@@ -219,19 +223,25 @@ class TournamentView(ttk.Frame):
         self.notebook.select(0)
 
     def load_tournaments(self):
+        """Load and display all tournaments in the list"""
+        # Clear existing items
         for item in self.tournaments_table.get_children():
             self.tournaments_table.delete(item)
 
         tournaments = self.callbacks.get('load_tournaments')()
         for name, tournament_data in tournaments.items():
+            # Get status with default value if not present
+            status = tournament_data.get("status", "Non démarré")
+
             self.tournaments_table.insert(
                 "",
                 tk.END,
                 values=(
                     tournament_data["name"],
                     tournament_data["location"],
+                    status,  # Add status here
                     tournament_data["start_date"],
-                    len(tournament_data["players"]),
+                    len(tournament_data.get("players", [])),
                     "✏️"
                 )
             )
@@ -289,15 +299,19 @@ class TournamentView(ttk.Frame):
                 tournament_name,
                 selected_players
             )
-            if success:
+            # Check if the message contains a warning about player count
+            if "Attention" in message:
+                messagebox.showwarning("Attention", message)
+            else:
                 messagebox.showinfo("Succès", message)
+
                 self.load_tournaments()
                 # Close the selection window
                 if hasattr(self,
                            'selection_window') and self.selection_window.winfo_exists():
                     self.selection_window.destroy()
-            else:
-                messagebox.showerror("Erreur", message)
+                else:
+                    messagebox.showerror("Erreur", message)
         else:
             messagebox.showwerror("Aucun joueur sélectionné",
                                   "Veuillez sélectionner au moins un joueur")

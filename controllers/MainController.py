@@ -33,7 +33,11 @@ class MainController:
         self.home_controller = HomeController(self)
         self.player_controller = PlayerController(self)
         self.tournament_controller = TournamentController(self)
+        # Initialize round controller after tournament controller
         self.round_controller = RoundController(self)
+
+        # Make sure the round controller has access to the tournament controller
+        self.round_controller.tournament_controller = self.tournament_controller
 
         # Initialize views
         self.views = {}
@@ -67,4 +71,10 @@ class MainController:
             view_name (str): Name of the view to display
             ('home', 'players', or 'tournaments')
         """
+        # If switching to rounds view, make sure tournament data is passed
+        if view_name == "rounds" and hasattr(self.tournament_controller, "current_tournament"):
+            self.round_controller.set_current_tournament(
+                self.tournament_controller.current_tournament
+            )
+            
         self.views[view_name].tkraise()

@@ -4,27 +4,27 @@ from datetime import datetime
 class Tournament:
     """Represents a chess tournament with players, rounds, and matches"""
 
-    def __init__(self, name, location, start_date, end_date, rounds=4,
-                 current_round=1, description=""):
-        """Initialize a tournament with its basic information
+    def __init__(self, name, location, start_date, end_date, rounds, description):
+        """Initialize a new tournament
 
         Args:
             name (str): Tournament name
             location (str): Tournament location
-            start_date (str): Start date of tournament
-            end_date (str): End date of tournament
-            rounds (int): Number of rounds (default: 4)
-            current_round (int): Current round number (default: 1)
-            description (str): Tournament description (default: empty)
+            start_date (str): Start date in DD/MM/YYYY format
+            end_date (str): End date in DD/MM/YYYY format
+            rounds (int): Number of rounds
+            description (str): Tournament description
         """
         self.name = name
         self.location = location
         self.start_date = start_date
         self.end_date = end_date
         self.rounds = rounds
-        self.current_round = current_round
         self.description = description
         self.players = []
+        self.current_round = 0
+        self.rounds_data = []
+        self.status = "Non démarré"  # Add default status
         self.matches = []
         self.rounds_history = []
         self.created_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -60,7 +60,8 @@ class Tournament:
             "players": [player.national_id for player in self.players],
             "matches": self.matches,
             "rounds_history": self.rounds_history,
-            "created_at": self.created_at
+            "created_at": self.created_at,
+            "status": self.status  # Add status to the dictionary
         }
 
     @classmethod

@@ -57,6 +57,9 @@ class TournamentController:
 
         tournaments = self.load_tournaments()
         if tournament_data["name"] in tournaments:
+            if tournaments[tournament_data.get("original_name")
+                           ].get('status') == "En cours":
+                return False, "Impossible de modifier un tournoi déjà démarré"
             if not edit_mode:
                 # In create mode, any existing name is an error
                 message = (f"Un tournoi avec le nom {tournament_data['name']} "
@@ -132,43 +135,39 @@ class TournamentController:
         data = self.data_manager.load_data()
         return data.get("players", {})
 
-    def add_players_to_tournament(self, name, player_ids):
-        """Add multiple players to a tournament
+    def add_players_to_tournament(self, tournament_name, player_ids):
+        """Add players to a tournament
 
         Args:
-            name: Name of the tournament
+            tournament_name: Name of the tournament to add players to
             player_ids: List of player IDs to add
-
-        Returns:
-            tuple: (success: bool, message: str)
+            Returns:
+            tuple: (success, message) indicating result
         """
-        try:
-            # Load the complete data structure
-            data = self.data_manager.load_data()
-            tournaments = data.get("tournaments", {})
+        # Load current data
+        data = self.data_manager.load_data()
+        tournaments = data.get("tournaments", {})
 
-            if name not in tournaments:
-                return False, "Tournoi non trouvé"
+        if tournament_name not in tournaments:
+            return False, "Tournoi non trouvé"
 
-            tournament = tournaments[name]
-            # Check if there's at least one player
+        # Check if tournament has already started
+        if tournaments[tournament_name].get('status') == "En cours":
+            return False, "Impossible d'ajouter des joueurs à un tournoi déjà démarré"
 
-            player_count = len(player_ids)
+        # Update the tournament's players directly in the data
+        tournaments[tournament_name]['players'] = player_ids
 
-            if player_count % 2 != 0:
-                return False, "Veuillez sélectionner un nombre de joueur pair"
-            # Update the player list
-            tournament['players'] = list(player_ids)
+        # Save the updated data
+        self.data_manager.save_data(data)
 
-            message = f"Liste des joueurs mise à jour ({player_count} joueurs)"
+        # Check if there are at least 8 players
+        if len(player_ids) < 8:
+            warning_message = (f"Attention: Le tournoi a {len(player_ids)} joueurs. "
+                               f"Un minimum de 8 joueurs est recommandé.")
+            return True, warning_message
 
-            # Save the complete data structure
-            data["tournaments"] = tournaments
-            self.data_manager.save_data(data)
-
-            return True, message
-        except Exception as e:
-            return False, f"Erreur lors de l'ajout des joueurs: {str(e)}"
+        return True, f"Joueurs ajoutés au tournoi {tournament_name}"
 
     def return_home(self):
         """Navigate back to home view"""
@@ -186,13 +185,17 @@ class TournamentController:
         if not tournament_data:
             return False, "Tournoi non trouvé"
 
-        # Check if the tournament has enough players
-        if len(tournament_data.get('players', [])) < 2:
-            return False, "Le tournoi doit avoir au moins 2 joueurs"
+        # Check if the tournament has enough players (minimum 8)
+        players = tournament_data.get('players', [])
+        if len(players) < 8:
+            return False, (f"Le tournoi doit avoir au moins 8 joueurs. "
+                           f"Actuellement: {len(players)}")
 
         # Store the tournament name in the controller for access by the rounds view
         self.current_tournament = tournament_name
-
+        data = self.data_manager.load_data()
+        data["tournaments"][tournament_name]["status"] = "En cours"
+        self.data_manager.save_data(data)
         # Navigate to the round page - only pass the view name
         self.master_controller.show_view("rounds")
-        return True, f"Affichage des tours pour {tournament_name}"
+
