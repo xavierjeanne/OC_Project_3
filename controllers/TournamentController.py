@@ -18,8 +18,8 @@ class TournamentController:
             'load_tournaments': self.load_tournaments,
             'load_available_players': self.load_available_players,
             'add_players_to_tournament': self.add_players_to_tournament,
-            'start_tournament': self.start_tournament,
-            'return_home': self.return_home
+            'return_home': self.return_home,
+            'open_round_page': self.open_round_page,
         }
 
     def get_callbacks(self):
@@ -55,13 +55,19 @@ class TournamentController:
                     tournament_data["description"]]):
             return False, "Tous les champs sont obligatoires."
 
-        existing_tournament = self.data_manager.load_tournament(
-            tournament_data["name"]
-            )
-        if existing_tournament and not edit_mode:
-            message = (f"Un tournoi avec le nom {tournament_data["name"]}  "
-                       f"existe déjà.")
-            return False, message
+        tournaments = self.load_tournaments()
+        if tournament_data["name"] in tournaments:
+            if not edit_mode:
+                # In create mode, any existing name is an error
+                message = (f"Un tournoi avec le nom {tournament_data['name']} "
+                           f"existe déjà.")
+                return False, message
+            elif edit_mode and (tournament_data.get("original_name")
+                                != tournament_data["name"]):
+                # In edit mode, only a different existing name is an error
+                message = (f"Un tournoi avec le nom {tournament_data['name']} "
+                           f"existe déjà.")
+                return False, message
 
         try:
             start_day, start_month, start_year = tournament_data["start_date"].split(
@@ -76,7 +82,7 @@ class TournamentController:
                 raise ValueError
             start_date_int = int(start_year + start_month + start_day)
         except ValueError:
-            return False, "Format de date invalide. Utilisez JJ/MM/AAAA"
+            return False, "Format de date invalide . Utilisez JJ/MM/AAAA"
         try:
             end_day, end_month, end_year = tournament_data["end_date"].split('/')
             if not (len(end_day) == 2 and len(end_month) == 2 and len(end_year) == 4):
@@ -101,7 +107,12 @@ class TournamentController:
                 description=tournament_data["description"]
             )
         self.data_manager.save_tournament(tournament)
-        return True, "Tournament created successfully"
+        if edit_mode:
+            success_message = (f"Tournoi '{tournament_data['name']}'"
+                               f"mis à jour avec succès")
+        else:
+            success_message = f"Tournoi '{tournament_data['name']}' créé avec succès"
+        return True, success_message
 
     def load_tournaments(self):
         """Load all tournaments from the database
@@ -121,52 +132,67 @@ class TournamentController:
         data = self.data_manager.load_data()
         return data.get("players", {})
 
-    def add_players_to_tournament(self, tournament_id, player_ids):
+    def add_players_to_tournament(self, name, player_ids):
         """Add multiple players to a tournament
 
         Args:
-            tournament_id: ID of the tournament
+            name: Name of the tournament
             player_ids: List of player IDs to add
 
         Returns:
             tuple: (success: bool, message: str)
         """
         try:
-            tournaments = self.load_tournaments()
-            if tournament_id not in tournaments:
-                return False, "Tournament not found"
+            # Load the complete data structure
+            data = self.data_manager.load_data()
+            tournaments = data.get("tournaments", {})
 
-            tournament = tournaments[tournament_id]
-            tournament['players'].extend(player_ids)
-            self.data_manager.save_data({'tournaments': tournaments})
-            return True, "Players added successfully"
+            if name not in tournaments:
+                return False, "Tournoi non trouvé"
+
+            tournament = tournaments[name]
+            # Check if there's at least one player
+
+            player_count = len(player_ids)
+
+            if player_count % 2 != 0:
+                return False, "Veuillez sélectionner un nombre de joueur pair"
+            # Update the player list
+            tournament['players'] = list(player_ids)
+
+            message = f"Liste des joueurs mise à jour ({player_count} joueurs)"
+
+            # Save the complete data structure
+            data["tournaments"] = tournaments
+            self.data_manager.save_data(data)
+
+            return True, message
         except Exception as e:
-            return False, f"Error adding players: {str(e)}"
-
-    def start_tournament(self, tournament_id):
-        """Start a specific tournament
-
-        Args:
-            tournament_id: ID of the tournament to start
-
-        Returns:
-            tuple: (success: bool, message: str)
-        """
-        try:
-            tournaments = self.load_tournaments()
-            if tournament_id not in tournaments:
-                return False, "Tournament not found"
-
-            tournament = tournaments[tournament_id]
-            if len(tournament['players']) < 2:
-                return False, "Not enough players to start tournament"
-
-            tournament['status'] = 'In Progress'
-            self.data_manager.save_data({'tournaments': tournaments})
-            return True, "Tournament started successfully"
-        except Exception as e:
-            return False, f"Error starting tournament: {str(e)}"
+            return False, f"Erreur lors de l'ajout des joueurs: {str(e)}"
 
     def return_home(self):
         """Navigate back to home view"""
         self.master_controller.show_view("home")
+
+    def open_round_page(self, tournament_name):
+        """Open the round management page for the selected tournament
+        Args:
+            tournament_name: Name of the tournament to manage rounds for
+        """
+        # Get the tournament data
+        tournaments = self.load_tournaments()
+        tournament_data = tournaments.get(tournament_name)
+
+        if not tournament_data:
+            return False, "Tournoi non trouvé"
+
+        # Check if the tournament has enough players
+        if len(tournament_data.get('players', [])) < 2:
+            return False, "Le tournoi doit avoir au moins 2 joueurs"
+
+        # Store the tournament name in the controller for access by the rounds view
+        self.current_tournament = tournament_name
+
+        # Navigate to the round page - only pass the view name
+        self.master_controller.show_view("rounds")
+        return True, f"Affichage des tours pour {tournament_name}"

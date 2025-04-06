@@ -1,128 +1,50 @@
 {
+    "tournaments": {
+        "legal": {
+            "name": "legal",
+            "location": "lae",
+            "start_date": "17/10/2015",
+            "end_date": "20/10/2016",
+            "rounds": 4,
+            "current_round": 1,
+            "description": "fzerfezf",
+            "players": [
+                "fe12546",
+                "no12587"
+            ],
+            "matches": [],
+            "rounds_history": [],
+            "created_at": "2025-04-02 16:27:00"
+        },
+        "ggfgtf": {
+            "name": "ggfgtf",
+            "location": "daef",
+            "start_date": "08/10/2005",
+            "end_date": "10/10/2005",
+            "rounds": 2,
+            "current_round": 1,
+            "description": "fezfezfez",
+            "players": [
+                "fe12546",
+                "no12587"
+            ],
+            "matches": [],
+            "rounds_history": [],
+            "created_at": "2025-04-01 23:46:58"
+        }
+    },
     "players": {
-        "NO12346": {
-            "last_name": "FRED",
-            "first_name": "FERDE",
-            "birth_date": "08/10/1981",
-            "national_id": "NO12346"
+        "fe12546": {
+            "last_name": "efzze",
+            "first_name": "zefezf",
+            "birth_date": "01/10/1985",
+            "national_id": "fe12546"
         },
-        "NO12345": {
-            "last_name": "xac",
-            "first_name": "jeanne",
-            "birth_date": "01/10/1965",
-            "national_id": "NO12345"
-        },
-        "nd01452": {
-            "last_name": "test",
-            "first_name": "didier",
-            "birth_date": "08/10/1981",
-            "national_id": "nd01452"
-        },
-        "kd10256": {
+        "no12587": {
             "last_name": "xavier",
             "first_name": "jeanne",
             "birth_date": "08/10/1981",
-            "national_id": "kd10256"
-        },
-        "zrrz1256547": {
-            "last_name": "fzfe",
-            "first_name": "rzgrzg",
-            "birth_date": "zrg",
-            "national_id": "zrrz1256547"
-        },
-        "ZEDZED": {
-            "last_name": "FEZFEZF",
-            "first_name": "ZEFEZF",
-            "birth_date": "12452005ZE",
-            "national_id": "ZEDZED"
-        },
-        "no12347": {
-            "last_name": "dzedezdf",
-            "first_name": "zefezf",
-            "birth_date": "08/10/1981",
-            "national_id": "no12347"
-        },
-        "zr12565": {
-            "last_name": "fzfe",
-            "first_name": "rzgrzg",
-            "birth_date": "10/12/2012",
-            "national_id": "zr12565"
-        },
-        "ds12546": {
-            "last_name": "jeane",
-            "first_name": "mzrc",
-            "birth_date": "08/10/1981",
-            "national_id": "ds12546"
-        },
-        "sd54785": {
-            "last_name": "fedffe",
-            "first_name": "defezf",
-            "birth_date": "01/08/2021",
-            "national_id": "sd54785"
-        },
-        "NO12348": {
-            "last_name": "TEST",
-            "first_name": "A",
-            "birth_date": "17/10/2002",
-            "national_id": "NO12348"
-        }
-    },
-    "tournaments": {
-        "test": {
-            "name": "test",
-            "location": "caen",
-            "start_date": "17/20/2025",
-            "end_date": "25/10/2025",
-            "rounds": 4,
-            "current_round": 1,
-            "description": "xdedze",
-            "players": [],
-            "matches": [],
-            "rounds_history": [],
-            "status": "Not Started",
-            "created_at": "2025-03-26 16:44:52"
-        },
-        "test 2": {
-            "name": "test 2",
-            "location": "caen",
-            "start_date": "17/20/2025",
-            "end_date": "25/10/2025",
-            "rounds": 4,
-            "current_round": 1,
-            "description": "xdedze",
-            "players": [],
-            "matches": [],
-            "rounds_history": [],
-            "status": "Not Started",
-            "created_at": "2025-03-26 16:45:03"
-        },
-        "test5": {
-            "name": "test5",
-            "location": "caen",
-            "start_date": "17/12/2015",
-            "end_date": "17/12/2015",
-            "rounds": 4,
-            "current_round": 1,
-            "description": "dezfezf",
-            "players": [],
-            "matches": [],
-            "rounds_history": [],
-            "status": "Not Started",
-            "created_at": "2025-03-31 23:27:34"
-        },
-        "test7": {
-            "name": "test7",
-            "location": "caen",
-            "start_date": "17/12/2015",
-            "end_date": "17/12/2015",
-            "rounds": 4,
-            "current_round": 1,
-            "description": "dezfezf",
-            "players": [],
-            "matches": [],
-            "rounds_history": [],
-            "status": "Not Started",
-            "created_at": "2025-03-31 23:28:43"
+            "national_id": "no12587"
         }
     }
 }

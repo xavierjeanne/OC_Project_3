@@ -138,6 +138,10 @@ class PlayerView(ttk.Frame):
             "national_id": self.entries["national_id"].get().strip()
         }
 
+        # Add the original ID if in edit mode
+        if self.edit_mode:
+            player_data["original_id"] = self.entries["national_id"].get().strip()
+
         success, message = self.callbacks.get('save_player')(player_data,
                                                              self.edit_mode)
         if success:

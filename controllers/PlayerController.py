@@ -52,10 +52,17 @@ class PlayerController:
                 national_id[2:].isdigit()):
             return False, "L'ID national doit contenir 2 lettres suivies de 5 chiffres"
 
-        # Check if ID is already in use
-        existing_player = self.data_manager.load_player(national_id)
-        if existing_player and not edit_mode:
-            return False, f"Un joueur avec l'ID {national_id} existe déjà."
+        # Check for existing player with the same ID
+        players = self.load_players()
+        national_id = player_data["national_id"]
+
+        if national_id in players:
+            if not edit_mode:
+                # In create mode, any existing ID is an error
+                return False, f"Un joueur avec l'ID {national_id} existe déjà."
+            elif edit_mode and player_data.get("original_id") != national_id:
+                # In edit mode, only a different existing ID is an error
+                return False, f"Un joueur avec l'ID {national_id} existe déjà."
         # Validate birth date format
         try:
             day, month, year = player_data["birth_date"].split('/')
@@ -72,9 +79,13 @@ class PlayerController:
         player = Player(player_data["last_name"], player_data["first_name"],
                         player_data["birth_date"], player_data["national_id"])
         self.data_manager.save_player(player)
-        message = (f"Le joueur {player_data['first_name']} "
-                   f"{player_data['last_name']} a été enregistré.")
-        return True, message
+        if edit_mode:
+            success_message = (f"Le joueur '{player_data['first_name']}'"
+                               f"mis à jour avec succès")
+        else:
+            success_message = (f"Le joueur '{player_data['first_name']}'"
+                               f"créé avec succès")
+        return True, success_message
 
     def load_players(self):
         """Load all players from the database

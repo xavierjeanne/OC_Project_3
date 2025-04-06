@@ -27,7 +27,6 @@ class Tournament:
         self.players = []
         self.matches = []
         self.rounds_history = []
-        self.status = "Not Started"  # Not Started, In Progress, Completed
         self.created_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     def add_player(self, player):
@@ -43,19 +42,6 @@ class Tournament:
             self.players.append(player)
             return True
         return False
-
-    def start_tournament(self):
-        """Start the tournament if conditions are met
-
-        Returns:
-            tuple: (success: bool, message: str)
-        """
-        if len(self.players) < 2:
-            return False, "Not enough players"
-        if len(self.players) % 2 != 0:
-            return False, "Need even number of players"
-        self.status = "In Progress"
-        return True, "Tournament started"
 
     def to_dict(self):
         """Convert tournament data to dictionary format for storage
@@ -74,7 +60,6 @@ class Tournament:
             "players": [player.national_id for player in self.players],
             "matches": self.matches,
             "rounds_history": self.rounds_history,
-            "status": self.status,
             "created_at": self.created_at
         }
 
@@ -99,6 +84,5 @@ class Tournament:
         )
         tournament.matches = data["matches"]
         tournament.rounds_history = data["rounds_history"]
-        tournament.status = data["status"]
         tournament.created_at = data["created_at"]
         return tournament

@@ -2,6 +2,8 @@ from views.BaseView import BaseView
 from controllers.HomeController import HomeController
 from controllers.PlayerController import PlayerController
 from controllers.TournamentController import TournamentController
+from controllers.RoundController import RoundController
+from views.RoundView import RoundView
 from views.HomeView import HomeView
 from views.PlayerView import PlayerView
 from views.TournamentView import TournamentView
@@ -31,6 +33,7 @@ class MainController:
         self.home_controller = HomeController(self)
         self.player_controller = PlayerController(self)
         self.tournament_controller = TournamentController(self)
+        self.round_controller = RoundController(self)
 
         # Initialize views
         self.views = {}
@@ -45,6 +48,10 @@ class MainController:
         self.views["tournaments"] = TournamentView(
             self.base_view.content_container,
             **self.tournament_controller.get_callbacks()
+        )
+        self.views["rounds"] = RoundView(
+            self.base_view.content_container,
+            **self.round_controller.get_callbacks()
         )
 
         # Configure all views

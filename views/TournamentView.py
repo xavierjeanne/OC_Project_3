@@ -30,7 +30,7 @@ class TournamentView(ttk.Frame):
 
         # Create tournament tab
         self.add_tournament_frame = ttk.Frame(self.notebook, style='Main.TFrame')
-        self.notebook.add(self.add_tournament_frame, text="Ajouter Tournoi")
+        self.notebook.add(self.add_tournament_frame, text="Ajouter un Tournoi")
         self._setup_add_tournament_tab()
 
         # Tournament list tab
@@ -93,12 +93,11 @@ class TournamentView(ttk.Frame):
         - Tournament list table
         - Player addition functionality
         - Tournament start option
-        - Status tracking
         """
         self.list_tournaments_frame.grid_rowconfigure(0, weight=1)
         self.list_tournaments_frame.grid_columnconfigure(0, weight=1)
 
-        columns = ("name", "location", "start_date", "status", "players","edit")
+        columns = ("name", "location", "start_date", "players", "edit")
         self.tournaments_table = ttk.Treeview(self.list_tournaments_frame,
                                               columns=columns,
                                               show='headings',
@@ -108,7 +107,6 @@ class TournamentView(ttk.Frame):
             "name": "Nom",
             "location": "Lieu",
             "start_date": "Date de début",
-            "status": "Statut",
             "players": "Joueurs",
             "edit": "Editer"
         }
@@ -123,7 +121,7 @@ class TournamentView(ttk.Frame):
 
         # Add click event binding
         self.tournaments_table.bind('<ButtonRelease-1>', self.handle_click)
-        
+
         self.tournaments_table.grid(row=0, column=0, sticky='nsew', padx=10, pady=10)
         # Add scrollbar
         scrollbar = ttk.Scrollbar(self.list_tournaments_frame,
@@ -141,7 +139,7 @@ class TournamentView(ttk.Frame):
                    command=self.add_players_to_tournament,
                    style='Custom.TButton').pack(side=tk.LEFT, padx=5)
         ttk.Button(btn_frame,
-                   text="Démarrer le tournoi",
+                   text="Afficher les tours",
                    command=self.start_selected_tournament,
                    style='Custom.TButton').pack(side=tk.LEFT, padx=5)
 
@@ -157,17 +155,30 @@ class TournamentView(ttk.Frame):
             "description": self.entries["description"].get("1.0", tk.END).strip()
         }
 
+        # Add the original name if in edit mode
+        if self.edit_mode and hasattr(self, 'current_tournament_name'):
+            tournament_data["original_name"] = self.current_tournament_name
+
         success, message = self.callbacks.get('save_tournament')(tournament_data,
                                                                  self.edit_mode)
         if success:
             messagebox.showinfo("Succès", message)
-            for entry in self.entries.values():
-                entry.delete(0, tk.END)
-            self.load_tournaments()
             self.reset_form()
+            self.load_tournaments()
             self.notebook.select(1)
         else:
             messagebox.showerror("Erreur", message)
+
+    def reset_form(self):
+        """Reset the form to its initial state"""
+        for field, entry in self.entries.items():
+            if field == "description":
+                entry.delete("1.0", tk.END)
+            else:
+                entry.delete(0, tk.END)
+
+        self.edit_mode = False
+        self.current_tournament_name = None
 
     def handle_click(self, event):
         """Handle click events on the players table"""
@@ -175,7 +186,7 @@ class TournamentView(ttk.Frame):
         if region == "cell":
             item = self.tournaments_table.selection()[0]
             column = self.tournaments_table.identify_column(event.x)
-            if column == '#6':
+            if column == '#5':
                 values = self.tournaments_table.item(item)['values']
                 # Pass the tournament name (first value in the row)
                 self.fill_edit_form(values[0])
@@ -185,25 +196,25 @@ class TournamentView(ttk.Frame):
         # Get full tournament data
         tournaments = self.callbacks.get('load_tournaments')()
         tournament_data = tournaments.get(name, {})
-        
+
         if not tournament_data:
             return
-            
+
         # Fill the form fields
         for field in ["name", "location", "start_date", "end_date", "rounds"]:
             if field in self.entries and field in tournament_data:
                 self.entries[field].delete(0, tk.END)
                 self.entries[field].insert(0, tournament_data[field])
-        
+
         # Handle the description text widget separately
         if "description" in self.entries and "description" in tournament_data:
             self.entries["description"].delete("1.0", tk.END)
             self.entries["description"].insert("1.0", tournament_data["description"])
-        
+
         # Update UI to reflect edit mode
         self.edit_mode = True
         self.current_tournament_name = name
-        
+
         # Switch to the edit tab
         self.notebook.select(0)
 
@@ -220,17 +231,10 @@ class TournamentView(ttk.Frame):
                     tournament_data["name"],
                     tournament_data["location"],
                     tournament_data["start_date"],
-                    tournament_data["status"],
                     len(tournament_data["players"]),
                     "✏️"
                 )
             )
-
-    def reset_form(self):
-        """Reset the form to its initial state"""
-        for entry in self.entries.values():
-            entry.delete(0, tk.END)
-            self.edit_mode = False
 
     def add_players_to_tournament(self):
         selected = self.tournaments_table.selection()
@@ -239,43 +243,64 @@ class TournamentView(ttk.Frame):
                                    "Veuillez sélectionner un tournoi")
             return
 
-        selection_window = tk.Toplevel(self)
-        selection_window.title("Ajouter des joueurs")
-        selection_window.geometry("400x500")
+        # Get the tournament name from the selected row
+        item = selected[0]
+        values = self.tournaments_table.item(item)['values']
+        tournament_name = values[0]
 
-        players_frame = ttk.Frame(selection_window)
+        # Get tournament data to check existing players
+        tournaments = self.callbacks.get('load_tournaments')()
+        tournament_data = tournaments.get(tournament_name, {})
+        existing_players = tournament_data.get('players', [])
+
+        self.selection_window = tk.Toplevel(self)
+        self.selection_window.title(f"Ajouter des joueurs - {tournament_name}")
+        self.selection_window.geometry("400x500")
+
+        players_frame = ttk.Frame(self.selection_window)
         players_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
 
         players = self.callbacks.get('load_available_players')()
+
         self.player_vars = {}
         for player_id, player_data in players.items():
             var = tk.BooleanVar()
+            # Pre-select if player is already in the tournament
+            if player_id in existing_players:
+                var.set(True)
             self.player_vars[player_id] = var
             player_name = f"{player_data['last_name']} {player_data['first_name']}"
             ttk.Checkbutton(players_frame,
                             text=player_name,
                             variable=var).pack(anchor='w', pady=2)
 
-        ttk.Button(selection_window,
-                   text="Ajouter les joueurs sélectionnés",
-                   command=lambda: self._confirm_add_players(selected[0]),
+        ttk.Button(self.selection_window,
+                   text="Mettre à jour les joueurs",
+                   command=lambda: self._confirm_add_players(tournament_name),
                    style='Custom.TButton').pack(pady=10)
 
-    def _confirm_add_players(self, name):
+    def _confirm_add_players(self, tournament_name):
         selected_players = [
             player_id for player_id, var in self.player_vars.items()
             if var.get()
         ]
         if selected_players:
             success, message = self.callbacks.get('add_players_to_tournament')(
-                name,
+                tournament_name,
                 selected_players
             )
             if success:
                 messagebox.showinfo("Succès", message)
                 self.load_tournaments()
+                # Close the selection window
+                if hasattr(self,
+                           'selection_window') and self.selection_window.winfo_exists():
+                    self.selection_window.destroy()
             else:
                 messagebox.showerror("Erreur", message)
+        else:
+            messagebox.showwerror("Aucun joueur sélectionné",
+                                  "Veuillez sélectionner au moins un joueur")
 
     def start_selected_tournament(self):
         selected = self.tournaments_table.selection()
@@ -283,10 +308,13 @@ class TournamentView(ttk.Frame):
             messagebox.showwarning("Sélection requise",
                                    "Veuillez sélectionner un tournoi")
             return
+        # Get the tournament name from the selected row
+        item = selected[0]
+        values = self.tournaments_table.item(item)['values']
+        tournament_name = values[0]
 
-        success, message = self.callbacks.get('start_tournament')(selected[0])
+        success, message = self.callbacks.get('open_round_page')(tournament_name)
         if success:
             messagebox.showinfo("Succès", message)
-            self.load_tournaments()
         else:
             messagebox.showerror("Erreur", message)

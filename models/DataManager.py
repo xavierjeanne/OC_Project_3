@@ -65,9 +65,14 @@ class DataManager:
         """Save a player to the database
 
         Args:
-            player (Player): Player object to save
+            player: Player object to save
         """
         data = self.load_data()
+
+        # Initialize the players dictionary if it doesn't exist
+        if "players" not in data:
+            data["players"] = {}
+
         data["players"][player.national_id] = player.to_dict()
         self.save_data(data)
 
