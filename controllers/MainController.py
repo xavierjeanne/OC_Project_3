@@ -7,6 +7,8 @@ from views.RoundView import RoundView
 from views.HomeView import HomeView
 from views.PlayerView import PlayerView
 from views.TournamentView import TournamentView
+from controllers.ReportController import ReportController
+from views.ReportView import ReportView
 
 
 class MainController:
@@ -35,6 +37,7 @@ class MainController:
         self.tournament_controller = TournamentController(self)
         # Initialize round controller after tournament controller
         self.round_controller = RoundController(self)
+        self.report_controller = ReportController(self)
 
         # Make sure the round controller has access to the tournament controller
         self.round_controller.tournament_controller = self.tournament_controller
@@ -57,7 +60,10 @@ class MainController:
             self.base_view.content_container,
             **self.round_controller.get_callbacks()
         )
-
+        self.views["reports"] = ReportView(
+            self.base_view.content_container,
+            **self.report_controller.get_callbacks()
+        )
         # Configure all views
         for view in self.views.values():
             view.grid(row=0, column=0, sticky="nsew")
@@ -72,9 +78,10 @@ class MainController:
             ('home', 'players', or 'tournaments')
         """
         # If switching to rounds view, make sure tournament data is passed
-        if view_name == "rounds" and hasattr(self.tournament_controller, "current_tournament"):
+        if view_name == "rounds" and hasattr(self.tournament_controller,
+                                             "current_tournament"):
             self.round_controller.set_current_tournament(
                 self.tournament_controller.current_tournament
             )
-            
+
         self.views[view_name].tkraise()

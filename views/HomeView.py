@@ -37,3 +37,10 @@ class HomeView(ttk.Frame):
             style='Custom.TButton',
             cursor='hand2'
             ).pack(pady=10)
+        ttk.Button(
+            btn_frame,
+            text="Rapports",
+            command=callbacks.get('show_reports'),
+            cursor='hand2',
+            style='Custom.TButton'
+            ).pack(pady=20)

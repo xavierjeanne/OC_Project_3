@@ -10,7 +10,8 @@ class HomeController:
         self.master_controller = master_controller
         self.callbacks = {
             'show_players': self.show_players,
-            'show_tournaments': self.show_tournaments
+            'show_tournaments': self.show_tournaments,
+            'show_reports': self.show_reports
         }
 
     def get_callbacks(self):
@@ -28,3 +29,7 @@ class HomeController:
     def show_tournaments(self):
         """Navigate to tournaments management view"""
         self.master_controller.show_view("tournaments")
+
+    def show_reports(self):
+        """Navigate to reports management view"""
+        self.master_controller.show_view("reports")

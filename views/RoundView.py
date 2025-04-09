@@ -1,7 +1,5 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
-from datetime import datetime
-import random
 
 
 class RoundView(ttk.Frame):
@@ -20,35 +18,35 @@ class RoundView(ttk.Frame):
         self.callbacks = callbacks
         self.edit_mode = False
         self.tournament_data = None
-        
+
         # Return button
         ttk.Button(self,
                    text="Retour à la liste des tournois",
                    command=self.callbacks.get('return_list_tournament'),
                    cursor='hand2',
                    style='Custom.TButton').grid(row=0, column=0, pady=10)
-    
+
         # Create notebook
         self.notebook = ttk.Notebook(self, style='Custom.TNotebook')
         self.notebook.grid(row=1, column=0, sticky='nsew', padx=10, pady=10)
-    
+
         # round list tab
         self.list_rounds_frame = ttk.Frame(self.notebook, style='Main.TFrame')
         self.notebook.add(self.list_rounds_frame, text="Liste des tours")
         self._setup_list_rounds_tab()
-    
+
         # Create round tab
         self.list_scores_frame = ttk.Frame(self.notebook, style='Main.TFrame')
         self.notebook.add(self.list_scores_frame, text="Score des matchs")
         self._setup_list_scores_tab()
-    
+
         self.ranking_frame = ttk.Frame(self.notebook, style='Main.TFrame')
         self.notebook.add(self.ranking_frame, text="Classement des joueurs")
         self._setup_ranking_tab()
-    
+
         self.grid_rowconfigure(1, weight=1)
         self.grid_columnconfigure(0, weight=1)
-        
+
         # Don't load tournament data immediately
         # We'll load it when the view is shown
 
@@ -86,7 +84,7 @@ class RoundView(ttk.Frame):
             self.rounds_table.column(col, width=150)
 
         self.rounds_table.grid(row=0, column=0, sticky='nsew', padx=10, pady=10)
-        
+
         # Add scrollbar
         scrollbar = ttk.Scrollbar(self.list_rounds_frame,
                                   orient=tk.VERTICAL,
@@ -102,7 +100,7 @@ class RoundView(ttk.Frame):
                    text="Créer un nouveau tour",
                    command=self.create_new_round,
                    style='Custom.TButton').pack(side=tk.LEFT, padx=5)
-        
+
         ttk.Button(btn_frame,
                    text="Terminer le tour sélectionné",
                    command=self.finish_selected_round,
@@ -136,7 +134,7 @@ class RoundView(ttk.Frame):
                 self.matches_table.column(col, width=150)
 
         self.matches_table.grid(row=0, column=0, sticky='nsew', padx=10, pady=10)
-        
+
         # Add scrollbar
         scrollbar = ttk.Scrollbar(self.list_scores_frame,
                                   orient=tk.VERTICAL,
@@ -181,7 +179,7 @@ class RoundView(ttk.Frame):
                 self.rankings_table.column(col, width=250)
 
         self.rankings_table.grid(row=0, column=0, sticky='nsew', padx=10, pady=10)
-        
+
         # Add scrollbar
         scrollbar = ttk.Scrollbar(self.ranking_frame,
                                   orient=tk.VERTICAL,
@@ -200,9 +198,9 @@ class RoundView(ttk.Frame):
         # Clear existing items
         for item in self.rounds_table.get_children():
             self.rounds_table.delete(item)
-        
+
         rounds_data = self.tournament_data.get('rounds_data', [])
-        
+
         for round_data in rounds_data:
             status = "Terminé" if round_data.get('end_time') else "En cours"
             self.rounds_table.insert(
@@ -233,10 +231,10 @@ class RoundView(ttk.Frame):
                 # Match format: ((player1_id, score1), (player2_id, score2))
                 player1_id, score1 = match[0]
                 player2_id, score2 = match[1]
-                
+
                 player1_name = players_data.get(player1_id, {}).get('name', player1_id)
                 player2_name = players_data.get(player2_id, {}).get('name', player2_id)
-                
+
                 self.matches_table.insert(
                     "",
                     tk.END,
@@ -255,18 +253,18 @@ class RoundView(ttk.Frame):
         # Clear existing items
         for item in self.rankings_table.get_children():
             self.rankings_table.delete(item)
-        
+
         # Get player points from controller
         player_points = self.callbacks.get('calculate_player_points')()
         players_data = self.callbacks.get('load_players_data')()
-        
+
         # Sort players by points (descending)
         sorted_players = sorted(player_points.items(), key=lambda x: x[1], reverse=True)
-        
+
         # Display rankings
         for rank, (player_id, points) in enumerate(sorted_players, 1):
             player_name = players_data.get(player_id, {}).get('name', player_id)
-            
+
             self.rankings_table.insert(
                 "",
                 tk.END,
@@ -292,10 +290,10 @@ class RoundView(ttk.Frame):
         if not selection:
             messagebox.showwarning("Avertissement", "Veuillez sélectionner un tour")
             return
-        
+
         item = selection[0]
         round_name = self.rounds_table.item(item)['values'][0]
-        
+
         success, message = self.callbacks.get('finish_round')(round_name)
         if success:
             messagebox.showinfo("Succès", message)
@@ -309,49 +307,60 @@ class RoundView(ttk.Frame):
         if not selection:
             messagebox.showwarning("Avertissement", "Veuillez sélectionner un match")
             return
-        
+
         item = selection[0]
         values = self.matches_table.item(item)['values']
         tags = self.matches_table.item(item)['tags']
-        
+
         round_name = values[0]
         player1_id, player2_id = tags[0], tags[1]
-        
+
         # Create score update dialog
         self.score_dialog = tk.Toplevel(self)
         self.score_dialog.title("Mettre à jour les scores")
         self.score_dialog.geometry("400x200")
         self.score_dialog.resizable(False, False)
-        
-        ttk.Label(self.score_dialog, text=f"Match: {values[1]} vs {values[3]}").pack(pady=10)
-        
+
+        ttk.Label(self.score_dialog,
+                  text=f"Match: {values[1]} vs {values[3]}").pack(pady=10)
+
         score_frame = ttk.Frame(self.score_dialog)
         score_frame.pack(pady=10)
-        
-        ttk.Label(score_frame, text=f"{values[1]}:").grid(row=0, column=0, padx=5, pady=5)
+
+        ttk.Label(score_frame,
+                  text=f"{values[1]}:").grid(row=0, column=0, padx=5, pady=5)
         score1_var = tk.StringVar(value=values[2])
-        score1_combo = ttk.Combobox(score_frame, textvariable=score1_var, values=["0", "0.5", "1"], width=5)
+        score1_combo = ttk.Combobox(score_frame,
+                                    textvariable=score1_var,
+                                    values=["0", "0.5", "1"], width=5)
         score1_combo.grid(row=0, column=1, padx=5, pady=5)
-        
-        ttk.Label(score_frame, text=f"{values[3]}:").grid(row=1, column=0, padx=5, pady=5)
+
+        ttk.Label(score_frame, text=f"{values[3]}:").grid(row=1,
+                                                          column=0,
+                                                          padx=5,
+                                                          pady=5)
         score2_var = tk.StringVar(value=values[4])
-        score2_combo = ttk.Combobox(score_frame, textvariable=score2_var, values=["0", "0.5", "1"], width=5)
+        score2_combo = ttk.Combobox(score_frame,
+                                    textvariable=score2_var,
+                                    values=["0", "0.5", "1"],
+                                    width=5)
         score2_combo.grid(row=1, column=1, padx=5, pady=5)
-        
+
         def save_scores():
             try:
                 score1 = float(score1_var.get())
                 score2 = float(score2_var.get())
-                
+
                 # Validate scores
                 if score1 + score2 > 1:
-                    messagebox.showerror("Erreur", "La somme des scores ne peut pas dépasser 1")
+                    messagebox.showerror("Erreur",
+                                         "La somme des scores ne peut pas dépasser 1")
                     return
-                
+
                 success, message = self.callbacks.get('update_match_scores')(
                     round_name, player1_id, player2_id, score1, score2
                 )
-                
+
                 if success:
                     messagebox.showinfo("Succès", message)
                     self.score_dialog.destroy()
@@ -359,6 +368,8 @@ class RoundView(ttk.Frame):
                 else:
                     messagebox.showerror("Erreur", message)
             except ValueError:
-                messagebox.showerror("Erreur", "Les scores doivent être des nombres valides")
-        
-        ttk.Button(self.score_dialog, text="Enregistrer", command=save_scores).pack(pady=10)
+                messagebox.showerror("Erreur",
+                                     "Les scores doivent être des nombres valides")
+
+        ttk.Button(self.score_dialog, text="Enregistrer",
+                   command=save_scores).pack(pady=10)

@@ -198,4 +198,3 @@ class TournamentController:
         self.data_manager.save_data(data)
         # Navigate to the round page - only pass the view name
         self.master_controller.show_view("rounds")
-
