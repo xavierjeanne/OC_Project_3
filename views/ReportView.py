@@ -265,29 +265,21 @@ class ReportView(ttk.Frame):
         for item in self.players_table.get_children():
             self.players_table.delete(item)
 
-        # Get players data
-        players_data = self.callbacks.get('load_all_players')()
-
-        # Sort players alphabetically by name, handling missing keys
-        sorted_players = sorted(
-            players_data.items(),
-            key=lambda x: x[1].get('last_name',
-                                   '').lower() if isinstance(x[1], dict) else ''
-        )
+        # Get pre-sorted players data from controller
+        sorted_players = self.callbacks.get('get_players_alphabetical')()
 
         # Display players
-        for player_id, player in sorted_players:
-            if isinstance(player, dict):
-                self.players_table.insert(
-                    "",
-                    tk.END,
-                    values=(
-                        player.get('last_name', ''),
-                        player.get('first_name', ''),
-                        player.get('birth_date', ''),
-                        player_id
-                    )
+        for player in sorted_players:
+            self.players_table.insert(
+                "",
+                tk.END,
+                values=(
+                    player.get('last_name', ''),
+                    player.get('first_name', ''),
+                    player.get('birth_date', ''),
+                    player.get('id', '')
                 )
+            )
 
     def load_tournaments(self):
         """Load and display all tournaments"""
@@ -295,27 +287,19 @@ class ReportView(ttk.Frame):
         for item in self.tournaments_table.get_children():
             self.tournaments_table.delete(item)
 
-        # Get tournaments data
-        tournaments_data = self.callbacks.get('load_all_tournaments')()
+        # Get formatted tournaments data from controller
+        tournaments = self.callbacks.get('get_tournaments_for_display')()
 
-        # Update tournament selectors if they exist
-        tournament_names = list(tournaments_data.keys())
-
-        # Only update selectors if they've been created
-        if hasattr(self, 'tournament_selector'):
-            self.tournament_selector['values'] = tournament_names
-        if hasattr(self, 'players_tournament_selector'):
-            self.players_tournament_selector['values'] = tournament_names
-        if hasattr(self, 'rounds_tournament_selector'):
-            self.rounds_tournament_selector['values'] = tournament_names
+        # Update tournament selectors
+        self.update_tournament_selectors()
 
         # Display tournaments
-        for name, tournament in tournaments_data.items():
+        for tournament in tournaments:
             self.tournaments_table.insert(
                 "",
                 tk.END,
                 values=(
-                    name,
+                    tournament.get('name', ''),
                     tournament.get('location', ''),
                     tournament.get('start_date', ''),
                     tournament.get('end_date', ''),
@@ -326,60 +310,54 @@ class ReportView(ttk.Frame):
     def load_tournament_details(self):
         """Load and display details of the selected tournament"""
         tournament_name = self.tournament_selector.get()
-        if not tournament_name:
-            messagebox.showwarning("Avertissement", "Veuillez sélectionner un tournoi")
+
+        # Let controller handle validation and data retrieval
+        result = (self.
+                  callbacks.get('get_tournament_details_for_display')(tournament_name))
+
+        if not result['success']:
+            messagebox.showwarning("Avertissement", result['message'])
             return
 
         # Clear existing items
         for item in self.tournament_table_detail.get_children():
             self.tournament_table_detail.delete(item)
 
-        # Get tournament data
-        tournament_data = self.callbacks.get('get_tournament_details')(tournament_name)
-        if not tournament_data:
-            messagebox.showerror("Erreur",
-                                 f"Tournoi {tournament_name} non trouvé")
-            return
-
-        # Insert tournament details into the table
+        # Display tournament details
+        tournament = result['data']
         self.tournament_table_detail.insert(
             "",
             tk.END,
             values=(
-                tournament_name,
-                tournament_data.get('location', ''),
-                tournament_data.get('start_date', ''),
-                tournament_data.get('end_date', ''),
-                tournament_data.get('rounds', ''),
-                tournament_data.get('description', ''),
-                tournament_data.get('status', 'Non démarré')
+                tournament.get('name', ''),
+                tournament.get('location', ''),
+                tournament.get('start_date', ''),
+                tournament.get('end_date', ''),
+                tournament.get('rounds', ''),
+                tournament.get('description', ''),
+                tournament.get('status', 'Non démarré')
             )
         )
 
     def load_tournament_players(self):
         """Load and display players of the selected tournament"""
         tournament_name = self.players_tournament_selector.get()
-        if not tournament_name:
-            messagebox.showwarning("Avertissement", "Veuillez sélectionner un tournoi")
+
+        # Let controller handle validation and data retrieval
+        result = (self.callbacks.get('get_tournament_players_for_display')
+                  (tournament_name))
+
+        if not result['success']:
+            messagebox.showwarning("Avertissement", result['message'])
             return
 
         # Clear existing items
         for item in self.tournament_players_table.get_children():
             self.tournament_players_table.delete(item)
 
-        # Get tournament players
-        players = self.callbacks.get('get_tournament_players')(tournament_name)
-        if not players:
-            messagebox.showinfo("Information", f"Aucun joueur trouvé pour le tournoi"
-                                f"{tournament_name}")
-            return
-
-        # Sort players alphabetically
-        sorted_players = sorted(players.items(),
-                                key=lambda x: x[1]['last_name'].lower())
-
         # Display players
-        for player_id, player in sorted_players:
+        players = result['data']
+        for player in players:
             self.tournament_players_table.insert(
                 "",
                 tk.END,
@@ -387,28 +365,25 @@ class ReportView(ttk.Frame):
                     player.get('last_name', ''),
                     player.get('first_name', ''),
                     player.get('birth_date', ''),
-                    player_id
+                    player.get('id', '')
                 )
             )
 
     def load_tournament_rounds_matches(self):
         """Load and display rounds and matches of the selected tournament"""
         tournament_name = self.rounds_tournament_selector.get()
-        if not tournament_name:
-            messagebox.showwarning("Avertissement", "Veuillez sélectionner un tournoi")
+
+        # Let controller handle validation and data retrieval
+        result = self.callbacks.get('get_tournament_rounds_matches_for_display')
+        (tournament_name)
+
+        if not result['success']:
+            messagebox.showwarning("Avertissement", result['message'])
             return
 
         # Clear existing widgets
         for widget in self.rounds_matches_container.winfo_children():
             widget.destroy()
-
-        # Get tournament rounds and matches
-        rounds_data = (self.
-                       callbacks.get('get_tournament_rounds_matches')(tournament_name))
-        if not rounds_data:
-            messagebox.showinfo("Information",
-                                f"Aucun tour trouvé pour le tournoi {tournament_name}")
-            return
 
         # Create a canvas with scrollbar for potentially many rounds
         canvas = tk.Canvas(self.rounds_matches_container)
@@ -428,10 +403,8 @@ class ReportView(ttk.Frame):
         canvas.pack(side="left", fill="both", expand=True)
         scrollbar.pack(side="right", fill="y")
 
-        # Get players data for displaying names
-        players_data = self.callbacks.get('load_all_players')()
-
-        # Display rounds and matches
+        # Display rounds and matches using pre-processed data from controller
+        rounds_data = result['data']
         for i, round_data in enumerate(rounds_data):
             round_frame = ttk.LabelFrame(
                 scrollable_frame,
@@ -490,38 +463,29 @@ class ReportView(ttk.Frame):
             # Use grid instead of pack for better control
             match_table.grid(row=0, column=0, sticky='nsew')
 
-            # Add matches to the table
+            # Add matches to the table - now using pre-formatted data from controller
             for j, match in enumerate(matches):
-                player1_id, score1 = match[0]
-                player2_id, score2 = match[1]
-
-                player1_name = players_data.get(player1_id, {}).get('last_name',
-                                                                    player1_id)
-                player2_name = players_data.get(player2_id, {}).get('last_name',
-                                                                    player2_id)
-                player1_first_name = players_data.get(player1_id, {}).get('first_name',
-                                                                          player1_id)
-                player2_first_name = players_data.get(player2_id, {}).get('first_name',
-                                                                          player2_id)
-                player1_name = f"{player1_first_name} {player1_name}"
-                player2_name = f"{player2_first_name} {player2_name}"
                 match_table.insert(
                     "",
                     tk.END,
                     values=(
                         f"Match {j+1}",
-                        player1_name,
-                        score1,
-                        player2_name,
-                        score2
+                        match.get('player1_name', ''),
+                        match.get('score1', ''),
+                        match.get('player2_name', ''),
+                        match.get('score2', '')
                     )
                 )
 
     def update_tournament_selectors(self):
         """Update all tournament selector comboboxes"""
-        tournaments = self.callbacks.get('load_all_tournaments')()
-        tournament_names = list(tournaments.keys())
+        # Get tournament names from controller
+        tournament_names = self.callbacks.get('get_tournament_names')()
 
-        self.tournament_selector['values'] = tournament_names
-        self.players_tournament_selector['values'] = tournament_names
-        self.rounds_tournament_selector['values'] = tournament_names
+        # Update all selectors
+        if hasattr(self, 'tournament_selector'):
+            self.tournament_selector['values'] = tournament_names
+        if hasattr(self, 'players_tournament_selector'):
+            self.players_tournament_selector['values'] = tournament_names
+        if hasattr(self, 'rounds_tournament_selector'):
+            self.rounds_tournament_selector['values'] = tournament_names
