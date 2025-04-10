@@ -1,5 +1,6 @@
 from datetime import datetime
 import random
+from models.DataManager import DataManager
 
 
 class RoundController:
@@ -12,7 +13,7 @@ class RoundController:
             master_controller: Main application controller
         """
         self.master_controller = master_controller
-        self.data_manager = master_controller.tournament_controller.data_manager
+        self.data_manager = DataManager()
         self.current_tournament = None
         self.callbacks = {
             'get_current_tournament': self.get_current_tournament,
@@ -21,6 +22,8 @@ class RoundController:
             'finish_round': self.finish_round,
             'update_match_scores': self.update_match_scores,
             'calculate_player_points': self.calculate_player_points,
+            'get_player_names': self.get_player_names,
+            'reset_tournament_data': self.reset_tournament_data,
             'return_list_tournament': self.return_to_tournaments
         }
 
@@ -53,6 +56,24 @@ class RoundController:
         data = self.data_manager.load_data()
         tournaments = data.get("tournaments", {})
         return tournaments.get(self.current_tournament, {})
+
+    def get_rounds_data(self):
+        """Get rounds data for current tournament
+
+        Returns:
+            list: List of rounds data
+        """
+        tournament_data = self.get_current_tournament()
+        return tournament_data.get('rounds_data', [])
+
+    def get_player_scores(self):
+        """Get player scores for current tournament
+
+        Returns:
+            dict: Dictionary of player scores
+        """
+       
+        return self.calculate_player_points()
 
     def load_players_data(self):
         """Load player data for the current tournament
@@ -223,9 +244,8 @@ class RoundController:
 
         # Update round end time
         data = self.data_manager.load_data()
-        data['tournaments'][self.current_tournament]
-        ['rounds_data'][round_index]['end_time'] = (datetime.now()
-                                                    .strftime("%d/%m/%Y %H:%M"))
+        # Fix this line - it was incorrectly broken across multiple lines
+        data['tournaments'][self.current_tournament]['rounds_data'][round_index]['end_time'] = datetime.now().strftime("%d/%m/%Y %H:%M")
 
         # Save updated data
         self.data_manager.save_data(data)
@@ -234,61 +254,60 @@ class RoundController:
 
     def update_match_scores(self, round_name, player1_id, player2_id, score1, score2):
         """Update scores for a match
-
+        
         Args:
             round_name: Name of the round
             player1_id: ID of player 1
             player2_id: ID of player 2
             score1: Score for player 1
             score2: Score for player 2
-
+            
         Returns:
             tuple: (success, message)
         """
+    
         tournament_data = self.get_current_tournament()
+        if tournament_data is None:
+            return False, "Données de tournoi invalides"
 
-        # Find the round
         rounds_data = tournament_data.get('rounds_data', [])
-        round_index = None
+        
+        # Find the round index
+        round_index = next((i for i, r in enumerate(rounds_data) if r.get('name') == round_name), None)
+        if round_index is None:
+            return False, "Tour non trouvé"
+        
+        # Find the match index
         match_index = None
+        for i, match in enumerate(rounds_data[round_index].get('matches', [])):
+            if len(match) == 2:
+                player_a, _ = match[0]
+                player_b, _ = match[1]
+                if {player_a, player_b} == {player1_id, player2_id}:
+                    match_index = i
+                    break
 
-        for i, round_data in enumerate(rounds_data):
-            if round_data.get('name') == round_name:
-                round_index = i
-                # Find the match
-                for j, match in enumerate(round_data.get('matches', [])):
-                    match_player1 = match[0][0]
-                    match_player2 = match[1][0]
-                    if ((match_player1 == player1_id and match_player2 == player2_id)
-                        or
-                       (match_player1 == player2_id and match_player2 == player1_id)):
-                        match_index = j
-                        break
-                break
-
-        if round_index is None or match_index is None:
+        if match_index is None:
             return False, "Match non trouvé"
+        
+        try:
+            score1 = float(score1)
+            score2 = float(score2)
+        except ValueError:
+            return False, "Les scores doivent être des nombres valides"
 
-        # Update match scores
+        if round(score1 + score2, 2) != 1.0:
+            return False, "La somme des scores doit être égale à 1.0"
+        # Update the match score
         data = self.data_manager.load_data()
-        match = data['tournaments'][self.current_tournament]
-        ['rounds_data'][round_index]['matches'][match_index]
-
-        # Determine which player is which in the stored match
-        if match[0][0] == player1_id:
-            match[0] = (player1_id, score1)
-            match[1] = (player2_id, score2)
-        else:
-            match[0] = (player2_id, score2)
-            match[1] = (player1_id, score1)
-
-        data['tournaments'][self.current_tournament]
-        ['rounds_data'][round_index]['matches'][match_index] = match
-
-        # Save updated data
+        data['tournaments'][self.current_tournament]['rounds_data'][round_index]['matches'][match_index] = [
+            [player1_id, float(score1)],
+            [player2_id, float(score2)]
+        ]
         self.data_manager.save_data(data)
-
+        
         return True, "Scores mis à jour avec succès"
+
 
     def calculate_player_points(self):
         """Calculate points for each player in the tournament
@@ -315,4 +334,24 @@ class RoundController:
 
     def return_to_tournaments(self):
         """Return to the tournaments list view"""
+        self.reset_tournament_data()
         self.master_controller.show_view("tournaments")
+
+    def get_player_names(self):
+        """Get a dictionary of player IDs to names
+        
+        Returns:
+            dict: Dictionary mapping player IDs to names
+        """
+        data = self.data_manager.load_data()
+        players = data.get('players', {})
+        
+        player_names = {}
+        for player_id, player_data in players.items():
+            player_names[player_id] = f"{player_data.get('first_name', '')} {player_data.get('last_name', '')}"
+        
+        return player_names
+    
+    def reset_tournament_data(self):
+        """Reset the current tournament data when navigating back"""
+        self.current_tournament = None

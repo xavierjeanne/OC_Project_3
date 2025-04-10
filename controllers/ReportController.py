@@ -18,12 +18,10 @@ class ReportController:
             'get_players_alphabetical': self.get_players_alphabetical,
             'get_tournaments_for_display': self.get_tournaments_for_display,
             'get_tournament_names': self.get_tournament_names,
-            'get_tournament_details_for_display':
-                self.get_tournament_details_for_display,
-            'get_tournament_players_for_display':
-                self.get_tournament_players_for_display,
-            'get_tournament_rounds_matches_for_display':
-                self.get_tournament_rounds_matches_for_display,
+            'get_tournament_details_for_display': self.get_tournament_details_for_display,
+            'get_tournament_players_for_display': self.get_tournament_players_for_display,
+            'get_tournament_rounds_matches_for_display': self.get_tournament_rounds_matches_for_display,
+            'get_tournament_standings_for_display': self.get_tournament_standings_for_display,  # Add this line
             'return_home': self.return_home
         }
 
@@ -285,46 +283,126 @@ class ReportController:
 
         # Format rounds and matches for display
         formatted_rounds = []
-        for round_data in rounds_data:
-            formatted_round = {
-                'name': round_data.get('name', ''),
-                'start_time': round_data.get('start_time', 'Non démarré'),
-                'end_time': round_data.get('end_time', 'En cours'),
-                'matches': []
-            }
-
-            # Format matches
-            matches = round_data.get('matches', [])
-            for match in matches:
-                player1_id, score1 = match[0]
-                player2_id, score2 = match[1]
-
-                player1_name = players_data.get(player1_id, {}).get('last_name',
-                                                                    player1_id)
-                player2_name = players_data.get(player2_id, {}).get('last_name',
-                                                                    player2_id)
-                player1_first_name = players_data.get(player1_id, {}).get('first_name',
-                                                                          player1_id)
-                player2_first_name = players_data.get(player2_id, {}).get('first_name',
-                                                                          player2_id)
-
-                formatted_match = {
-                    'player1_name': f"{player1_first_name} {player1_name}",
-                    'score1': score1,
-                    'player2_name': f"{player2_first_name} {player2_name}",
-                    'score2': score2
+        try:
+            for round_data in rounds_data:
+                formatted_round = {
+                    'name': round_data.get('name', ''),
+                    'start_time': round_data.get('start_time', 'Non démarré'),
+                    'end_time': round_data.get('end_time', 'En cours'),
+                    'matches': []
                 }
 
-                formatted_round['matches'].append(formatted_match)
+                # Format matches
+                matches = round_data.get('matches', [])
+                for match in matches:
+                    if len(match) != 2:
+                        continue  # Skip invalid matches
+                    
+                    player1_id, score1 = match[0]
+                    player2_id, score2 = match[1]
 
-            formatted_rounds.append(formatted_round)
+                    player1_data = players_data.get(player1_id, {})
+                    player2_data = players_data.get(player2_id, {})
+                    
+                    player1_name = player1_data.get('last_name', '')
+                    player2_name = player2_data.get('last_name', '')
+                    player1_first_name = player1_data.get('first_name', '')
+                    player2_first_name = player2_data.get('first_name', '')
 
-        return {
-            'success': True,
-            'message': "",
-            'data': formatted_rounds
-        }
+                    formatted_match = {
+                        'player1_name': f"{player1_first_name} {player1_name}".strip(),
+                        'score1': score1,
+                        'player2_name': f"{player2_first_name} {player2_name}".strip(),
+                        'score2': score2
+                    }
+
+                    formatted_round['matches'].append(formatted_match)
+
+                formatted_rounds.append(formatted_round)
+
+            return {
+                'success': True,
+                'message': "",
+                'data': formatted_rounds
+            }
+        except Exception as e:
+            # Add error handling to prevent crashes
+            return {
+                'success': False,
+                'message': f"Erreur lors du traitement des données: {str(e)}",
+                'data': None
+            }
 
     def return_home(self):
         """Navigate back to home view"""
         self.master_controller.show_view("home")
+
+
+    def get_tournament_standings_for_display(self, tournament_name):
+        """Get player standings/rankings for a specific tournament
+    
+        Args:
+            tournament_name (str): Name of the tournament
+    
+        Returns:
+            dict: Result containing success status, message, and data
+        """
+        if not tournament_name:
+            return {
+                'success': False,
+                'message': "Veuillez sélectionner un tournoi",
+                'data': None
+            }
+    
+        # Get tournament data
+        tournament_data = self.get_tournament_details(tournament_name)
+        
+        if not tournament_data:
+            return {
+                'success': False,
+                'message': f"Tournoi {tournament_name} non trouvé",
+                'data': None
+            }
+        
+        # Calculate player points
+        player_points = {}
+        rounds_data = tournament_data.get('rounds_data', [])
+        
+        # Initialize points for all players
+        for player_id in tournament_data.get('players', []):
+            player_points[player_id] = 0
+        
+        # Sum points from all rounds
+        for round_data in rounds_data:
+            for match in round_data.get('matches', []):
+                if len(match) == 2:
+                    player1_id, score1 = match[0]
+                    player2_id, score2 = match[1]
+                    
+                    if player1_id in player_points:
+                        player_points[player1_id] += float(score1)
+                    if player2_id in player_points:
+                        player_points[player2_id] += float(score2)
+        
+        # Sort players by points (descending)
+        sorted_players = sorted(player_points.items(), key=lambda x: x[1], reverse=True)
+        
+        # Get player details
+        players_data = self.load_all_players()
+        
+        # Format for display
+        result = []
+        for rank, (player_id, points) in enumerate(sorted_players, 1):
+            player_data = players_data.get(player_id, {})
+            result.append({
+                'rank': rank,
+                'last_name': player_data.get('last_name', ''),
+                'first_name': player_data.get('first_name', ''),
+                'points': points
+            })
+        
+        return {
+            'success': True,
+            'message': "",
+            'data': result
+        }

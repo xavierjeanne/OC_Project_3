@@ -6,7 +6,6 @@ class RoundView(ttk.Frame):
     """View for managing chess rounds,
     including creation and management of rounds"""
 
-    # In the __init__ method, remove the immediate call to load_tournament_data
     def __init__(self, parent, **callbacks):
         """Initialize the round management view
 
@@ -46,9 +45,24 @@ class RoundView(ttk.Frame):
 
         self.grid_rowconfigure(1, weight=1)
         self.grid_columnconfigure(0, weight=1)
-
+        
         # Don't load tournament data immediately
         # We'll load it when the view is shown
+
+    def show(self):
+        """Called when the view is shown to load tournament data"""
+        # Clear existing items in tables
+        for item in self.rounds_table.get_children():
+            self.rounds_table.delete(item)
+        
+        for item in self.matches_table.get_children():
+            self.matches_table.delete(item)
+        
+        for item in self.rankings_table.get_children():
+            self.rankings_table.delete(item)
+        
+        # Load tournament data
+        self.load_tournament_data()
 
     def load_tournament_data(self):
         """Load current tournament data from controller"""
@@ -105,7 +119,7 @@ class RoundView(ttk.Frame):
                    text="Terminer le tour sélectionné",
                    command=self.finish_selected_round,
                    style='Custom.TButton').pack(side=tk.LEFT, padx=5)
-
+        
     def _setup_list_scores_tab(self):
         """Set up the tab for managing match scores"""
         self.list_scores_frame.grid_rowconfigure(0, weight=1)
@@ -150,7 +164,7 @@ class RoundView(ttk.Frame):
                    text="Mettre à jour les scores",
                    command=self.update_match_scores,
                    style='Custom.TButton').pack(side=tk.LEFT, padx=5)
-
+        self.load_matches()  # Load matches when the view is shown
     def _setup_ranking_tab(self):
         """Set up the tab for displaying player rankings"""
         self.ranking_frame.grid_rowconfigure(0, weight=1)
@@ -192,13 +206,21 @@ class RoundView(ttk.Frame):
                    text="Rafraîchir le classement",
                    command=self.update_rankings,
                    style='Custom.TButton').grid(row=1, column=0, pady=10)
-
+        self.load_player_rankings()  # Load rankings when the view is shown
+        
+    def load_player_rankings(self):
+        """Load and display player rankings for the current tournament"""
+        # Clear existing items first
+        for item in self.rankings_table.get_children():
+            self.rankings_table.delete(item)
+        
+        # Rest of your load_player_rankings code...
     def load_rounds(self):
         """Load and display rounds for the current tournament"""
-        # Clear existing items
+        # Clear existing items first
         for item in self.rounds_table.get_children():
             self.rounds_table.delete(item)
-
+        
         rounds_data = self.tournament_data.get('rounds_data', [])
 
         for round_data in rounds_data:
@@ -216,55 +238,71 @@ class RoundView(ttk.Frame):
 
     def load_matches(self):
         """Load and display matches for the current tournament"""
-        # Clear existing items
+        # Clear existing items first
         for item in self.matches_table.get_children():
             self.matches_table.delete(item)
-
+        
+        if not self.tournament_data:
+            return
+        
+        # Get player names dictionary for display
+        player_names = {}
+        if self.callbacks.get('get_player_names'):
+            player_names = self.callbacks.get('get_player_names')()
+        
+        # Load matches from all rounds
         rounds_data = self.tournament_data.get('rounds_data', [])
-        players_data = self.callbacks.get('load_players_data')()
-
+        
         for round_data in rounds_data:
             round_name = round_data.get('name', '')
-            matches = round_data.get('matches', [])
-
-            for match in matches:
-                # Match format: ((player1_id, score1), (player2_id, score2))
-                player1_id, score1 = match[0]
-                player2_id, score2 = match[1]
-
-                player1_name = players_data.get(player1_id, {}).get('name', player1_id)
-                player2_name = players_data.get(player2_id, {}).get('name', player2_id)
-
-                self.matches_table.insert(
-                    "",
-                    tk.END,
-                    values=(
-                        round_name,
-                        player1_name,
-                        score1,
-                        player2_name,
-                        score2
-                    ),
-                    tags=(player1_id, player2_id, round_name)
-                )
+            
+            for match in round_data.get('matches', []):
+                if isinstance(match, list) and len(match) == 2:
+                    player1_id, score1 = match[0]
+                    player2_id, score2 = match[1]
+                    
+                    player1_name = player_names.get(player1_id, f"Joueur {player1_id}")
+                    player2_name = player_names.get(player2_id, f"Joueur {player2_id}")
+                    
+                    self.matches_table.insert(
+                        "",
+                        tk.END,
+                        values=(
+                            round_name,
+                            player1_name,
+                            score1,
+                            player2_name,
+                            score2
+                        ),
+                        tags=(player1_id, player2_id)  # Store player IDs as tags for later use
+                    )
 
     def update_rankings(self):
-        """Update and display player rankings"""
-        # Clear existing items
+        """Update the player rankings display"""
+        # Clear existing items first
         for item in self.rankings_table.get_children():
             self.rankings_table.delete(item)
-
-        # Get player points from controller
-        player_points = self.callbacks.get('calculate_player_points')()
-        players_data = self.callbacks.get('load_players_data')()
-
-        # Sort players by points (descending)
+        
+        if not self.tournament_data:
+            return
+        
+        # Get player points
+        player_points = {}
+        if self.callbacks.get('calculate_player_points'):
+            player_points = self.callbacks.get('calculate_player_points')()
+        
+        # Get player names
+        player_names = {}
+        if self.callbacks.get('get_player_names'):
+            player_names = self.callbacks.get('get_player_names')()
+        
+        # Sort players by points
         sorted_players = sorted(player_points.items(), key=lambda x: x[1], reverse=True)
-
+        
         # Display rankings
         for rank, (player_id, points) in enumerate(sorted_players, 1):
-            player_name = players_data.get(player_id, {}).get('name', player_id)
-
+            player_name = player_names.get(player_id, f"Joueur {player_id}")
+            
             self.rankings_table.insert(
                 "",
                 tk.END,

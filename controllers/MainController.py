@@ -78,10 +78,7 @@ class MainController:
             ('home', 'players', or 'tournaments')
         """
         # If switching to rounds view, make sure tournament data is passed
-        if view_name == "rounds" and hasattr(self.tournament_controller,
-                                             "current_tournament"):
-            self.round_controller.set_current_tournament(
-                self.tournament_controller.current_tournament
-            )
+        if view_name == "rounds" :
+            self.views["rounds"].show()
 
         self.views[view_name].tkraise()
