@@ -24,7 +24,8 @@ class RoundController:
             'calculate_player_points': self.calculate_player_points,
             'get_player_names': self.get_player_names,
             'reset_tournament_data': self.reset_tournament_data,
-            'return_list_tournament': self.return_to_tournaments
+            'return_list_tournament': self.return_to_tournaments,
+            'finish_tournament': self.finish_tournament,
         }
 
     def get_callbacks(self):
@@ -241,7 +242,11 @@ class RoundController:
         # Check if the round is already finished
         if rounds_data[round_index].get('end_time'):
             return False, f"Le tour {round_name} est déjà terminé"
-
+        # Check if all matches have scores entered
+        round_matches = rounds_data[round_index].get('matches', [])
+        for match in round_matches:
+            if len(match) != 2 or match[0][1] == 0 and match[1][1] == 0:
+                return False, f"Tous les scores du tour {round_name} doivent être remplis avant de terminer"
         # Update round end time
         data = self.data_manager.load_data()
         # Fix this line - it was incorrectly broken across multiple lines
@@ -355,3 +360,55 @@ class RoundController:
     def reset_tournament_data(self):
         """Reset the current tournament data when navigating back"""
         self.current_tournament = None
+        
+    def finish_tournament(self):
+        """Mark the current tournament as finished
+        
+        Returns:
+            tuple: (success, message)
+        """
+        # Check if there is a current tournament
+        if not self.current_tournament:
+            return False, "Aucun tournoi sélectionné"
+            
+        tournament_data = self.get_current_tournament()
+        if not tournament_data:
+            return False, "Tournoi non trouvé"
+            
+        # Check if all rounds are completed
+        rounds_data = tournament_data.get('rounds_data', [])
+        max_rounds = int(tournament_data.get('rounds', 4))
+        
+        # Verify all rounds are created and completed
+        if len(rounds_data) < max_rounds:
+            return False, f"Tous les tours ({max_rounds}) doivent être créés avant de terminer le tournoi"
+            
+        # Check if any round is not finished
+        for round_data in rounds_data:
+            if not round_data.get('end_time'):
+                return False, "Tous les tours doivent être terminés avant de clôturer le tournoi"
+        
+        # Update tournament status
+        data = self.data_manager.load_data()
+        
+        # Make sure the tournament exists in the data
+        if self.current_tournament not in data.get('tournaments', {}):
+            return False, "Tournoi non trouvé dans la base de données"
+        
+        # Explicitly set the status to "Terminé"
+        data['tournaments'][self.current_tournament]['status'] = "Terminé"
+        
+       
+        
+        # Add end date to the tournament
+        data['tournaments'][self.current_tournament]['end_date'] = datetime.now().strftime("%d/%m/%Y")
+        
+        # Save updated data and verify it was saved
+        self.data_manager.save_data(data)
+        
+        # Double-check that the status was updated
+        verification_data = self.data_manager.load_data()
+        if verification_data['tournaments'][self.current_tournament].get('status') != "Terminé":
+            return False, "Erreur lors de la mise à jour du statut du tournoi"
+        
+        return True, "Tournoi terminé avec succès"

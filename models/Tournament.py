@@ -25,8 +25,6 @@ class Tournament:
         self.current_round = 0
         self.rounds_data = []
         self.status = "Non démarré"  # Add default status
-        self.matches = []
-        self.rounds_history = []
         self.created_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     def add_player(self, player):
@@ -58,8 +56,6 @@ class Tournament:
             "current_round": self.current_round,
             "description": self.description,
             "players": [player.national_id for player in self.players],
-            "matches": self.matches,
-            "rounds_history": self.rounds_history,
             "created_at": self.created_at,
             "status": self.status  # Add status to the dictionary
         }
@@ -81,9 +77,8 @@ class Tournament:
             data["end_date"],
             data["rounds"],
             data["current_round"],
-            data["description"]
+            data["description"],
+            data['status'],
         )
-        tournament.matches = data["matches"]
-        tournament.rounds_history = data["rounds_history"]
         tournament.created_at = data["created_at"]
         return tournament

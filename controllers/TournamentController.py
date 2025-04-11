@@ -57,9 +57,6 @@ class TournamentController:
 
         tournaments = self.load_tournaments()
         if tournament_data["name"] in tournaments:
-            if tournaments[tournament_data.get("original_name")
-                           ].get('status') == "En cours":
-                return False, "Impossible de modifier un tournoi déjà démarré"
             if not edit_mode:
                 # In create mode, any existing name is an error
                 message = (f"Un tournoi avec le nom {tournament_data['name']} "
@@ -194,8 +191,13 @@ class TournamentController:
         # Store the tournament name in the controller for access by the rounds view
         self.current_tournament = tournament_name
         data = self.data_manager.load_data()
-        data["tournaments"][tournament_name]["status"] = "En cours"
-        self.data_manager.save_data(data)
+       
+        # Only update status if tournament is not already in progress
+        if data["tournaments"][tournament_name].get("status") != "En cours":
+            data["tournaments"][tournament_name]["status"] = "En cours"
+            self.data_manager.save_data(data)
+        else:
+            self.data_manager.save_data(data)
         # Navigate to the round page - only pass the view name
         self.master_controller.show_view("rounds")
-        return True, "Tournoi démarré avec succès"
+        return True, f"Gestion du tournoi : {tournament_name}"

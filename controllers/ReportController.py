@@ -337,13 +337,10 @@ class ReportController:
         """Navigate back to home view"""
         self.master_controller.show_view("home")
 
-
     def get_tournament_standings_for_display(self, tournament_name):
         """Get player standings/rankings for a specific tournament
-    
         Args:
             tournament_name (str): Name of the tournament
-    
         Returns:
             dict: Result containing success status, message, and data
         """
@@ -353,10 +350,10 @@ class ReportController:
                 'message': "Veuillez sélectionner un tournoi",
                 'data': None
             }
-    
+
         # Get tournament data
         tournament_data = self.get_tournament_details(tournament_name)
-        
+
         if not tournament_data:
             return {
                 'success': False,

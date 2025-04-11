@@ -15,7 +15,6 @@ class RoundView(ttk.Frame):
         """
         super().__init__(parent, style='Main.TFrame')
         self.callbacks = callbacks
-        self.edit_mode = False
         self.tournament_data = None
 
         # Return button
@@ -165,6 +164,7 @@ class RoundView(ttk.Frame):
                    command=self.update_match_scores,
                    style='Custom.TButton').pack(side=tk.LEFT, padx=5)
         self.load_matches()  # Load matches when the view is shown
+        
     def _setup_ranking_tab(self):
         """Set up the tab for displaying player rankings"""
         self.ranking_frame.grid_rowconfigure(0, weight=1)
@@ -202,10 +202,19 @@ class RoundView(ttk.Frame):
         scrollbar.grid(row=0, column=1, sticky='ns')
 
         # Refresh button
-        ttk.Button(self.ranking_frame,
+        button_frame = ttk.Frame(self.ranking_frame, style='Main.TFrame')
+        button_frame.grid(row=1, column=0, pady=10)
+        
+        ttk.Button(button_frame,
                    text="Rafraîchir le classement",
                    command=self.update_rankings,
-                   style='Custom.TButton').grid(row=1, column=0, pady=10)
+                   style='Custom.TButton').pack(side=tk.LEFT, padx=5)
+                   
+        ttk.Button(button_frame,
+                   text="Terminer le tournoi",
+                   command=self.finish_tournament,
+                   style='Custom.TButton').pack(side=tk.LEFT, padx=5)
+        
         self.load_player_rankings()  # Load rankings when the view is shown
         
     def load_player_rankings(self):
@@ -314,7 +323,8 @@ class RoundView(ttk.Frame):
             )
 
     def create_new_round(self):
-        """Create a new round with paired players"""
+        """Create a new round with paired players.
+        Checks if previous round is finished before creating a new one."""
         success, message = self.callbacks.get('create_new_round')()
         if success:
             messagebox.showinfo("Succès", message)
@@ -383,31 +393,67 @@ class RoundView(ttk.Frame):
                                     values=["0", "0.5", "1"],
                                     width=5)
         score2_combo.grid(row=1, column=1, padx=5, pady=5)
-
-        def save_scores():
-            try:
-                score1 = float(score1_var.get())
-                score2 = float(score2_var.get())
-
-                # Validate scores
-                if score1 + score2 > 1:
-                    messagebox.showerror("Erreur",
-                                         "La somme des scores ne peut pas dépasser 1")
-                    return
-
-                success, message = self.callbacks.get('update_match_scores')(
-                    round_name, player1_id, player2_id, score1, score2
-                )
-
-                if success:
-                    messagebox.showinfo("Succès", message)
-                    self.score_dialog.destroy()
-                    self.load_tournament_data()
-                else:
-                    messagebox.showerror("Erreur", message)
-            except ValueError:
-                messagebox.showerror("Erreur",
-                                     "Les scores doivent être des nombres valides")
-
+        
+        # Store variables in instance for access in save_scores
+        self.score1_var = score1_var
+        self.score2_var = score2_var
+        self.current_round_name = round_name
+        self.current_player1_id = player1_id
+        self.current_player2_id = player2_id
+        
         ttk.Button(self.score_dialog, text="Enregistrer",
-                   command=save_scores).pack(pady=10)
+                   command=self.save_scores).pack(pady=10)
+        
+    def save_scores(self):
+        """Save the match scores entered by the user"""
+        try:
+            score1 = float(self.score1_var.get())
+            score2 = float(self.score2_var.get())
+
+            # Validate scores
+            if score1 + score2 > 1:
+                messagebox.showerror("Erreur",
+                                     "La somme des scores ne peut pas dépasser 1")
+                return
+
+            success, message = self.callbacks.get('update_match_scores')(
+                self.current_round_name, 
+                self.current_player1_id, 
+                self.current_player2_id, 
+                score1, 
+                score2
+            )
+
+            if success:
+                messagebox.showinfo("Succès", message)
+                self.score_dialog.destroy()
+                self.load_tournament_data()
+            else:
+                messagebox.showerror("Erreur", message)
+        except ValueError:
+            messagebox.showerror("Erreur",
+                                 "Les scores doivent être des nombres valides")
+
+    def finish_tournament(self):
+        """Mark the current tournament as finished"""
+        # Ask for confirmation
+        confirm = messagebox.askyesno(
+            "Confirmation", 
+            "Êtes-vous sûr de vouloir terminer ce tournoi ? Cette action est irréversible."
+        )
+        
+        if not confirm:
+            return
+            
+        # Call controller to finish tournament
+        if self.callbacks.get('finish_tournament'):
+            success, message = self.callbacks.get('finish_tournament')()
+            
+            if success:
+                messagebox.showinfo("Succès", message)
+                # Return to tournament list after finishing
+                self.callbacks.get('return_list_tournament')()
+            else:
+                messagebox.showerror("Erreur", message)
+        else:
+            messagebox.showerror("Erreur", "Fonction non disponible")

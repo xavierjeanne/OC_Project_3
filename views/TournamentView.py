@@ -185,15 +185,19 @@ class TournamentView(ttk.Frame):
         self.current_tournament_name = None
 
     def handle_click(self, event):
-        """Handle click events on the players table"""
+        """Handle click events on the tournaments table"""
         region = self.tournaments_table.identify_region(event.x, event.y)
         if region == "cell":
             item = self.tournaments_table.selection()[0]
             column = self.tournaments_table.identify_column(event.x)
-            if column == '#5':
+            if column == '#6':
                 values = self.tournaments_table.item(item)['values']
-                # Pass the tournament name (first value in the row)
-                self.fill_edit_form(values[0])
+               
+                if values[2] != "En cours" and values[2] != "Terminé":
+                    self.fill_edit_form(values[0])
+                else:
+                    messagebox.showwarning("Edition impossible",
+                                           "Impossible de modifier un tournoi démarré")
 
     def fill_edit_form(self, name):
         """Fill the tournament form with existing values for editing"""
@@ -252,15 +256,23 @@ class TournamentView(ttk.Frame):
             messagebox.showwarning("Sélection requise",
                                    "Veuillez sélectionner un tournoi")
             return
-
+            
         # Get the tournament name from the selected row
         item = selected[0]
         values = self.tournaments_table.item(item)['values']
         tournament_name = values[0]
-
-        # Get tournament data to check existing players
+        
+        # Check tournament status
         tournaments = self.callbacks.get('load_tournaments')()
         tournament_data = tournaments.get(tournament_name, {})
+        status = tournament_data.get('status', '')
+        
+        if status == "En cours" or status == "Terminé":
+            messagebox.showwarning("Action impossible", 
+                                 "Impossible d'ajouter des joueurs à un tournoi démarré")
+            return
+
+        # Get tournament data to check existing players
         existing_players = tournament_data.get('players', [])
 
         self.selection_window = tk.Toplevel(self)
@@ -313,7 +325,7 @@ class TournamentView(ttk.Frame):
                 else:
                     messagebox.showerror("Erreur", message)
         else:
-            messagebox.showwerror("Aucun joueur sélectionné",
+            messagebox.showerror("Aucun joueur sélectionné",
                                   "Veuillez sélectionner au moins un joueur")
 
     def start_selected_tournament(self):
