@@ -10,24 +10,36 @@ class ReportController:
         self.master_controller = master_controller
         self.data_manager = master_controller.tournament_controller.data_manager
         self.callbacks = {
-            'load_all_players': self.load_all_players,
-            'load_all_tournaments': self.load_all_tournaments,
-            'get_tournament_details': self.get_tournament_details,
-            'get_tournament_players': self.get_tournament_players,
-            'get_tournament_rounds_matches': self.get_tournament_rounds_matches,
-            'get_players_alphabetical': self.get_players_alphabetical,
-            'get_tournaments_for_display': self.get_tournaments_for_display,
-            'get_tournament_names': self.get_tournament_names,
-            'get_tournament_details_for_display': self.get_tournament_details_for_display,
-            'get_tournament_players_for_display': self.get_tournament_players_for_display,
-            'get_tournament_rounds_matches_for_display': self.get_tournament_rounds_matches_for_display,
-            'get_tournament_standings_for_display': self.get_tournament_standings_for_display,  # Add this line
-            'return_home': self.return_home
+            'load_all_players':
+                self.load_all_players,
+            'load_all_tournaments':
+                self.load_all_tournaments,
+            'get_tournament_details':
+                self.get_tournament_details,
+            'get_tournament_players':
+                self.get_tournament_players,
+            'get_tournament_rounds_matches':
+                self.get_tournament_rounds_matches,
+            'get_players_alphabetical':
+                self.get_players_alphabetical,
+            'get_tournaments_for_display':
+                self.get_tournaments_for_display,
+            'get_tournament_names':
+                self.get_tournament_names,
+            'get_tournament_details_for_display':
+                self.get_tournament_details_for_display,
+            'get_tournament_players_for_display':
+                self.get_tournament_players_for_display,
+            'get_tournament_rounds_matches_for_display':
+                self.get_tournament_rounds_matches_for_display,
+            'get_tournament_standings_for_display':
+                self.get_tournament_standings_for_display,  # Add this line
+            'return_home':
+                self.return_home
         }
 
     def get_callbacks(self):
         """Return the callback dictionary for the view
-
         Returns:
             dict: Dictionary containing view callback functions
         """
@@ -297,13 +309,13 @@ class ReportController:
                 for match in matches:
                     if len(match) != 2:
                         continue  # Skip invalid matches
-                    
+
                     player1_id, score1 = match[0]
                     player2_id, score2 = match[1]
 
                     player1_data = players_data.get(player1_id, {})
                     player2_data = players_data.get(player2_id, {})
-                    
+
                     player1_name = player1_data.get('last_name', '')
                     player2_name = player2_data.get('last_name', '')
                     player1_first_name = player1_data.get('first_name', '')
@@ -360,33 +372,33 @@ class ReportController:
                 'message': f"Tournoi {tournament_name} non trouvé",
                 'data': None
             }
-        
+
         # Calculate player points
         player_points = {}
         rounds_data = tournament_data.get('rounds_data', [])
-        
+
         # Initialize points for all players
         for player_id in tournament_data.get('players', []):
             player_points[player_id] = 0
-        
+
         # Sum points from all rounds
         for round_data in rounds_data:
             for match in round_data.get('matches', []):
                 if len(match) == 2:
                     player1_id, score1 = match[0]
                     player2_id, score2 = match[1]
-                    
+
                     if player1_id in player_points:
                         player_points[player1_id] += float(score1)
                     if player2_id in player_points:
                         player_points[player2_id] += float(score2)
-        
+
         # Sort players by points (descending)
         sorted_players = sorted(player_points.items(), key=lambda x: x[1], reverse=True)
-        
+
         # Get player details
         players_data = self.load_all_players()
-        
+
         # Format for display
         result = []
         for rank, (player_id, points) in enumerate(sorted_players, 1):
@@ -397,7 +409,7 @@ class ReportController:
                 'first_name': player_data.get('first_name', ''),
                 'points': points
             })
-        
+
         return {
             'success': True,
             'message': "",

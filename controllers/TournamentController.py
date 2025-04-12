@@ -99,13 +99,13 @@ class TournamentController:
             return False, "La date de fin doit être postérieure à la date de début."
 
         tournament = Tournament(
-                name=tournament_data["name"],
-                location=tournament_data["location"],
-                start_date=tournament_data["start_date"],
-                end_date=tournament_data["end_date"],
-                rounds=int(tournament_data["rounds"]),
-                description=tournament_data["description"]
-            )
+            name=tournament_data["name"],
+            location=tournament_data["location"],
+            start_date=tournament_data["start_date"],
+            end_date=tournament_data["end_date"],
+            rounds=int(tournament_data["rounds"]),
+            description=tournament_data["description"]
+        )
         self.data_manager.save_tournament(tournament)
         if edit_mode:
             success_message = (f"Tournoi '{tournament_data['name']}'"
@@ -191,7 +191,7 @@ class TournamentController:
         # Store the tournament name in the controller for access by the rounds view
         self.current_tournament = tournament_name
         data = self.data_manager.load_data()
-       
+
         # Only update status if tournament is not already in progress
         if data["tournaments"][tournament_name].get("status") != "En cours":
             data["tournaments"][tournament_name]["status"] = "En cours"

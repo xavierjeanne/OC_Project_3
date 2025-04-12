@@ -44,7 +44,7 @@ class RoundView(ttk.Frame):
 
         self.grid_rowconfigure(1, weight=1)
         self.grid_columnconfigure(0, weight=1)
-        
+
         # Don't load tournament data immediately
         # We'll load it when the view is shown
 
@@ -53,13 +53,13 @@ class RoundView(ttk.Frame):
         # Clear existing items in tables
         for item in self.rounds_table.get_children():
             self.rounds_table.delete(item)
-        
+
         for item in self.matches_table.get_children():
             self.matches_table.delete(item)
-        
+
         for item in self.rankings_table.get_children():
             self.rankings_table.delete(item)
-        
+
         # Load tournament data
         self.load_tournament_data()
 
@@ -118,7 +118,7 @@ class RoundView(ttk.Frame):
                    text="Terminer le tour sélectionné",
                    command=self.finish_selected_round,
                    style='Custom.TButton').pack(side=tk.LEFT, padx=5)
-        
+
     def _setup_list_scores_tab(self):
         """Set up the tab for managing match scores"""
         self.list_scores_frame.grid_rowconfigure(0, weight=1)
@@ -164,7 +164,7 @@ class RoundView(ttk.Frame):
                    command=self.update_match_scores,
                    style='Custom.TButton').pack(side=tk.LEFT, padx=5)
         self.load_matches()  # Load matches when the view is shown
-        
+
     def _setup_ranking_tab(self):
         """Set up the tab for displaying player rankings"""
         self.ranking_frame.grid_rowconfigure(0, weight=1)
@@ -204,32 +204,32 @@ class RoundView(ttk.Frame):
         # Refresh button
         button_frame = ttk.Frame(self.ranking_frame, style='Main.TFrame')
         button_frame.grid(row=1, column=0, pady=10)
-        
+
         ttk.Button(button_frame,
                    text="Rafraîchir le classement",
                    command=self.update_rankings,
                    style='Custom.TButton').pack(side=tk.LEFT, padx=5)
-                   
+
         ttk.Button(button_frame,
                    text="Terminer le tournoi",
                    command=self.finish_tournament,
                    style='Custom.TButton').pack(side=tk.LEFT, padx=5)
-        
+
         self.load_player_rankings()  # Load rankings when the view is shown
-        
+
     def load_player_rankings(self):
         """Load and display player rankings for the current tournament"""
         # Clear existing items first
         for item in self.rankings_table.get_children():
             self.rankings_table.delete(item)
-        
+
         # Rest of your load_player_rankings code...
     def load_rounds(self):
         """Load and display rounds for the current tournament"""
         # Clear existing items first
         for item in self.rounds_table.get_children():
             self.rounds_table.delete(item)
-        
+
         rounds_data = self.tournament_data.get('rounds_data', [])
 
         for round_data in rounds_data:
@@ -250,29 +250,29 @@ class RoundView(ttk.Frame):
         # Clear existing items first
         for item in self.matches_table.get_children():
             self.matches_table.delete(item)
-        
+
         if not self.tournament_data:
             return
-        
+
         # Get player names dictionary for display
         player_names = {}
         if self.callbacks.get('get_player_names'):
             player_names = self.callbacks.get('get_player_names')()
-        
+
         # Load matches from all rounds
         rounds_data = self.tournament_data.get('rounds_data', [])
-        
+
         for round_data in rounds_data:
             round_name = round_data.get('name', '')
-            
+
             for match in round_data.get('matches', []):
                 if isinstance(match, list) and len(match) == 2:
                     player1_id, score1 = match[0]
                     player2_id, score2 = match[1]
-                    
+
                     player1_name = player_names.get(player1_id, f"Joueur {player1_id}")
                     player2_name = player_names.get(player2_id, f"Joueur {player2_id}")
-                    
+
                     self.matches_table.insert(
                         "",
                         tk.END,
@@ -283,7 +283,8 @@ class RoundView(ttk.Frame):
                             player2_name,
                             score2
                         ),
-                        tags=(player1_id, player2_id)  # Store player IDs as tags for later use
+                        # Store player IDs as tags for later use
+                        tags=(player1_id, player2_id)
                     )
 
     def update_rankings(self):
@@ -291,27 +292,27 @@ class RoundView(ttk.Frame):
         # Clear existing items first
         for item in self.rankings_table.get_children():
             self.rankings_table.delete(item)
-        
+
         if not self.tournament_data:
             return
-        
+
         # Get player points
         player_points = {}
         if self.callbacks.get('calculate_player_points'):
             player_points = self.callbacks.get('calculate_player_points')()
-        
+
         # Get player names
         player_names = {}
         if self.callbacks.get('get_player_names'):
             player_names = self.callbacks.get('get_player_names')()
-        
+
         # Sort players by points
         sorted_players = sorted(player_points.items(), key=lambda x: x[1], reverse=True)
-        
+
         # Display rankings
         for rank, (player_id, points) in enumerate(sorted_players, 1):
             player_name = player_names.get(player_id, f"Joueur {player_id}")
-            
+
             self.rankings_table.insert(
                 "",
                 tk.END,
@@ -393,17 +394,17 @@ class RoundView(ttk.Frame):
                                     values=["0", "0.5", "1"],
                                     width=5)
         score2_combo.grid(row=1, column=1, padx=5, pady=5)
-        
+
         # Store variables in instance for access in save_scores
         self.score1_var = score1_var
         self.score2_var = score2_var
         self.current_round_name = round_name
         self.current_player1_id = player1_id
         self.current_player2_id = player2_id
-        
+
         ttk.Button(self.score_dialog, text="Enregistrer",
                    command=self.save_scores).pack(pady=10)
-        
+
     def save_scores(self):
         """Save the match scores entered by the user"""
         try:
@@ -417,10 +418,10 @@ class RoundView(ttk.Frame):
                 return
 
             success, message = self.callbacks.get('update_match_scores')(
-                self.current_round_name, 
-                self.current_player1_id, 
-                self.current_player2_id, 
-                score1, 
+                self.current_round_name,
+                self.current_player1_id,
+                self.current_player2_id,
+                score1,
                 score2
             )
 
@@ -438,17 +439,18 @@ class RoundView(ttk.Frame):
         """Mark the current tournament as finished"""
         # Ask for confirmation
         confirm = messagebox.askyesno(
-            "Confirmation", 
-            "Êtes-vous sûr de vouloir terminer ce tournoi ? Cette action est irréversible."
+            "Confirmation",
+            "Êtes-vous sûr de vouloir terminer ce tournoi ?"
+            "Cette action est irréversible."
         )
-        
+
         if not confirm:
             return
-            
+
         # Call controller to finish tournament
         if self.callbacks.get('finish_tournament'):
             success, message = self.callbacks.get('finish_tournament')()
-            
+
             if success:
                 messagebox.showinfo("Succès", message)
                 # Return to tournament list after finishing

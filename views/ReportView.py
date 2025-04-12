@@ -375,7 +375,8 @@ class ReportView(ttk.Frame):
 
         # Let controller handle validation and data retrieval
         # The issue is here - you need to call the method, not just reference it
-        result = self.callbacks.get('get_tournament_rounds_matches_for_display')(tournament_name)
+        result = self.callbacks.get(
+            'get_tournament_rounds_matches_for_display')(tournament_name)
 
         if not result['success']:
             messagebox.showwarning("Avertissement", result['message'])

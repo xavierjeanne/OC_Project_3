@@ -192,7 +192,7 @@ class TournamentView(ttk.Frame):
             column = self.tournaments_table.identify_column(event.x)
             if column == '#6':
                 values = self.tournaments_table.item(item)['values']
-               
+
                 if values[2] != "En cours" and values[2] != "Terminé":
                     self.fill_edit_form(values[0])
                 else:
@@ -256,23 +256,30 @@ class TournamentView(ttk.Frame):
             messagebox.showwarning("Sélection requise",
                                    "Veuillez sélectionner un tournoi")
             return
-            
+
         # Get the tournament name from the selected row
         item = selected[0]
         values = self.tournaments_table.item(item)['values']
         tournament_name = values[0]
-        
+
         # Check tournament status
         tournaments = self.callbacks.get('load_tournaments')()
         tournament_data = tournaments.get(tournament_name, {})
         status = tournament_data.get('status', '')
-        
+
         if status == "En cours" or status == "Terminé":
-            messagebox.showwarning("Action impossible", 
-                                 "Impossible d'ajouter des joueurs à un tournoi démarré")
+            messagebox.showwarning("Action impossible",
+                                   "Impossible d'ajouter des joueurs à un tournoi"
+                                   "démarré")
             return
+        # Get the tournament name from the selected row
+        item = selected[0]
+        values = self.tournaments_table.item(item)['values']
+        tournament_name = values[0]
 
         # Get tournament data to check existing players
+        tournaments = self.callbacks.get('load_tournaments')()
+        tournament_data = tournaments.get(tournament_name, {})
         existing_players = tournament_data.get('players', [])
 
         self.selection_window = tk.Toplevel(self)
@@ -325,7 +332,7 @@ class TournamentView(ttk.Frame):
                 else:
                     messagebox.showerror("Erreur", message)
         else:
-            messagebox.showerror("Aucun joueur sélectionné",
+            messagebox.showwerror("Aucun joueur sélectionné",
                                   "Veuillez sélectionner au moins un joueur")
 
     def start_selected_tournament(self):

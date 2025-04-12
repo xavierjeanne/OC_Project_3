@@ -73,7 +73,7 @@ class RoundController:
         Returns:
             dict: Dictionary of player scores
         """
-       
+
         return self.calculate_player_points()
 
     def load_players_data(self):
@@ -246,11 +246,16 @@ class RoundController:
         round_matches = rounds_data[round_index].get('matches', [])
         for match in round_matches:
             if len(match) != 2 or match[0][1] == 0 and match[1][1] == 0:
-                return False, f"Tous les scores du tour {round_name} doivent être remplis avant de terminer"
-        # Update round end time
+                return False, (f"Tous les scores du tour {round_name}"
+                               f"doivent être remplis avant de terminer")
+
         data = self.data_manager.load_data()
-        # Fix this line - it was incorrectly broken across multiple lines
-        data['tournaments'][self.current_tournament]['rounds_data'][round_index]['end_time'] = datetime.now().strftime("%d/%m/%Y %H:%M")
+
+        (data['tournaments']
+         [self.current_tournament]
+         ['rounds_data']
+         [round_index]
+         ['end_time']) = datetime.now().strftime("%d/%m/%Y %H:%M")
 
         # Save updated data
         self.data_manager.save_data(data)
@@ -259,29 +264,30 @@ class RoundController:
 
     def update_match_scores(self, round_name, player1_id, player2_id, score1, score2):
         """Update scores for a match
-        
+
         Args:
             round_name: Name of the round
             player1_id: ID of player 1
             player2_id: ID of player 2
             score1: Score for player 1
             score2: Score for player 2
-            
+
         Returns:
             tuple: (success, message)
         """
-    
+
         tournament_data = self.get_current_tournament()
         if tournament_data is None:
             return False, "Données de tournoi invalides"
 
         rounds_data = tournament_data.get('rounds_data', [])
-        
+
         # Find the round index
-        round_index = next((i for i, r in enumerate(rounds_data) if r.get('name') == round_name), None)
+        round_index = next((i for i, r in enumerate(rounds_data)
+                           if r.get('name') == round_name), None)
         if round_index is None:
             return False, "Tour non trouvé"
-        
+
         # Find the match index
         match_index = None
         for i, match in enumerate(rounds_data[round_index].get('matches', [])):
@@ -294,7 +300,7 @@ class RoundController:
 
         if match_index is None:
             return False, "Match non trouvé"
-        
+
         try:
             score1 = float(score1)
             score2 = float(score2)
@@ -305,14 +311,17 @@ class RoundController:
             return False, "La somme des scores doit être égale à 1.0"
         # Update the match score
         data = self.data_manager.load_data()
-        data['tournaments'][self.current_tournament]['rounds_data'][round_index]['matches'][match_index] = [
+        (data['tournaments']
+         [self.current_tournament]
+         ['rounds_data']
+         [round_index]
+         ['matches'][match_index]) = [
             [player1_id, float(score1)],
             [player2_id, float(score2)]
         ]
         self.data_manager.save_data(data)
-        
-        return True, "Scores mis à jour avec succès"
 
+        return True, "Scores mis à jour avec succès"
 
     def calculate_player_points(self):
         """Calculate points for each player in the tournament
@@ -344,71 +353,69 @@ class RoundController:
 
     def get_player_names(self):
         """Get a dictionary of player IDs to names
-        
+
         Returns:
             dict: Dictionary mapping player IDs to names
         """
         data = self.data_manager.load_data()
         players = data.get('players', {})
-        
+
         player_names = {}
         for player_id, player_data in players.items():
-            player_names[player_id] = f"{player_data.get('first_name', '')} {player_data.get('last_name', '')}"
-        
+            player_names[player_id] = f"{player_data.get('first_name', '')}"
+            f"{player_data.get('last_name', '')}"
+
         return player_names
-    
+
     def reset_tournament_data(self):
         """Reset the current tournament data when navigating back"""
         self.current_tournament = None
-        
+
     def finish_tournament(self):
         """Mark the current tournament as finished
-        
+
         Returns:
             tuple: (success, message)
         """
         # Check if there is a current tournament
         if not self.current_tournament:
             return False, "Aucun tournoi sélectionné"
-            
+
         tournament_data = self.get_current_tournament()
         if not tournament_data:
             return False, "Tournoi non trouvé"
-            
+
         # Check if all rounds are completed
         rounds_data = tournament_data.get('rounds_data', [])
         max_rounds = int(tournament_data.get('rounds', 4))
-        
+
         # Verify all rounds are created and completed
         if len(rounds_data) < max_rounds:
-            return False, f"Tous les tours ({max_rounds}) doivent être créés avant de terminer le tournoi"
-            
+            return False, (f"Tous les tours ({max_rounds}) doivent être créés"
+                           f"avant de terminer le tournoi")
+
         # Check if any round is not finished
         for round_data in rounds_data:
             if not round_data.get('end_time'):
-                return False, "Tous les tours doivent être terminés avant de clôturer le tournoi"
-        
+                return False, ("Tous les tours doivent être terminés"
+                               "avant de clôturer le tournoi")
+
         # Update tournament status
         data = self.data_manager.load_data()
-        
+
         # Make sure the tournament exists in the data
         if self.current_tournament not in data.get('tournaments', {}):
             return False, "Tournoi non trouvé dans la base de données"
-        
+
         # Explicitly set the status to "Terminé"
         data['tournaments'][self.current_tournament]['status'] = "Terminé"
-        
-       
-        
+
         # Add end date to the tournament
-        data['tournaments'][self.current_tournament]['end_date'] = datetime.now().strftime("%d/%m/%Y")
-        
+        (data['tournaments']
+         [self.current_tournament]
+         ['end_date']) = datetime.now().strftime("%d/%m/%Y")
+
         # Save updated data and verify it was saved
         self.data_manager.save_data(data)
-        
-        # Double-check that the status was updated
-        verification_data = self.data_manager.load_data()
-        if verification_data['tournaments'][self.current_tournament].get('status') != "Terminé":
-            return False, "Erreur lors de la mise à jour du statut du tournoi"
-        
+
         return True, "Tournoi terminé avec succès"
