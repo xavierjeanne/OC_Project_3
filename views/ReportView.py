@@ -51,12 +51,18 @@ class ReportView(ttk.Frame):
         self.rounds_matches_frame = ttk.Frame(self.notebook, style='Main.TFrame')
         self.notebook.add(self.rounds_matches_frame, text="Tours et matchs")
         self._setup_rounds_matches_tab()
-
+        
+        # Tournament scores tab
+        self.scores_frame = ttk.Frame(self.notebook, style='Main.TFrame')
+        self.notebook.add(self.scores_frame, text="Scores")
+        self._setup_scores_tab()
         # Initialize tournament selectors
         self.update_tournament_selectors()
 
         self.grid_rowconfigure(1, weight=1)
         self.grid_columnconfigure(0, weight=1)
+        
+      
 
     def _setup_players_tab(self):
         """Set up the tab for displaying all players alphabetically"""
@@ -259,6 +265,57 @@ class ReportView(ttk.Frame):
                                            padx=10,
                                            pady=10)
 
+    def _setup_scores_tab(self):
+        """Set up the tab for displaying scores
+        of a specific tournament"""
+        # Tournament select ion
+        selection_frame = ttk.Frame(self.scores_frame,
+                                    style='Main.TFrame')
+        selection_frame.pack(fill=tk.X, padx=10, pady=10)
+
+        ttk.Label(selection_frame,
+                  text="Sélectionner un tournoi:").pack(side=tk.LEFT, padx=5)
+        self.scores_selector = ttk.Combobox(selection_frame, width=30)
+        self.scores_selector.pack(side=tk.LEFT, padx=5)
+        ttk.Button(selection_frame,
+                   text="Afficher",
+                   command=self.load_scores,
+                   style='Custom.TButton').pack(side=tk.LEFT, padx=5)
+
+        # Players table
+        table_frame = ttk.Frame(self.scores_frame, style='Main.TFrame')
+        table_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        table_frame.grid_rowconfigure(0, weight=1)
+        table_frame.grid_columnconfigure(0, weight=1)
+
+        columns = ("rank", "last_name", "first_name", "score")
+        self.scores_table = ttk.Treeview(table_frame,
+                                         columns=columns,
+                                         show='headings',
+                                         style='Custom.Treeview')
+
+        headers = {
+            "rank": "Classement",
+            "last_name": "Nom",
+            "first_name": "Prénom",
+            "score": "score"
+        }
+
+        for col, text in headers.items():
+            self.scores_table.heading(col,
+                                      text=text,
+                                      anchor='nw')
+            self.scores_table.column(col, width=150)
+
+        self.scores_table.grid(row=0, column=0, sticky='nsew')
+
+        # Add scrollbar
+        scrollbar = ttk.Scrollbar(table_frame,
+                                  orient=tk.VERTICAL,
+                                  command=self.scores_table.yview)
+        self.scores_table.configure(yscroll=scrollbar.set)
+        scrollbar.grid(row=0, column=1, sticky='ns')
+        
     def load_players_alphabetical(self):
         """Load and display all players in alphabetical order"""
         # Clear existing items
@@ -338,6 +395,36 @@ class ReportView(ttk.Frame):
                 tournament.get('status', 'Non démarré')
             )
         )
+
+    def load_scores(self):
+        """Load and display scores of the selected tournament"""
+        tournament_name = self.scores_selector.get()
+
+        # Let controller handle validation and data retrieval
+        result = (self.
+                  callbacks.get('get_tournament_standings_for_display')(tournament_name))
+
+        if not result['success']:
+            messagebox.showwarning("Avertissement", result['message'])
+            return
+
+        # Clear existing items
+        for item in self.scores_table.get_children():
+            self.scores_table.delete(item)
+
+        # Display tournament scores - fixed to handle a list of players with scores
+        scores = result['data']
+        for score in scores:
+            self.scores_table.insert(
+                "",
+                tk.END,
+                values=(
+                    score.get('rank', ''),
+                    score.get('last_name', ''),
+                    score.get('first_name', ''),
+                    score.get('score', '')
+                )
+            )
 
     def load_tournament_players(self):
         """Load and display players of the selected tournament"""
@@ -490,3 +577,30 @@ class ReportView(ttk.Frame):
             self.players_tournament_selector['values'] = tournament_names
         if hasattr(self, 'rounds_tournament_selector'):
             self.rounds_tournament_selector['values'] = tournament_names
+        if hasattr(self, 'scores_selector'):
+            self.scores_selector['values'] = tournament_names
+            
+    def refresh_data(self):
+        """Refresh all data in the report view when it becomes visible again"""
+        # Reload all data
+        self.load_players_alphabetical()
+        self.load_tournaments()
+        self.update_tournament_selectors()
+        
+        # Refresh the currently selected tab data if needed
+        current_tab = self.notebook.select()
+        tab_id = self.notebook.index(current_tab)
+        
+        # Refresh specific tab data based on which tab is active
+        if tab_id == 2:  # Tournament details tab
+            if self.tournament_selector.get():
+                self.load_tournament_details()
+        elif tab_id == 3:  # Tournament players tab
+            if self.players_tournament_selector.get():
+                self.load_tournament_players()
+        elif tab_id == 4:  # Rounds and matches tab
+            if self.rounds_tournament_selector.get():
+                self.load_tournament_rounds_matches()
+        elif tab_id == 5:  # Scores tab
+            if self.scores_selector.get():
+                self.load_scores()

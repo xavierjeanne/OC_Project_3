@@ -1,385 +1,78 @@
 {
-    "tournaments": {
-        "test": {
-            "name": "test",
-            "location": "caen",
-            "start_date": "10/10/1985",
-            "end_date": "15/10/2015",
-            "rounds": 4,
-            "current_round": 0,
-            "description": "test",
-            "players": [],
-            "created_at": "2025-04-11 22:35:24",
-            "status": "Non d\u00e9marr\u00e9"
-        },
-        "quoi": {
-            "name": "quoi",
-            "location": "quand",
-            "start_date": "12/10/2021",
-            "end_date": "13/10/2022",
-            "rounds": 4,
-            "current_round": 2,
-            "description": "1254fze",
-            "players": [
-                "fe12546",
-                "no12587",
-                "sd12456",
-                "xd14587",
-                "fr12458",
-                "gt12478",
-                "gm14563",
-                "af78965"
-            ],
-            "matches": [],
-            "rounds_history": [],
-            "created_at": "2025-04-10 13:36:18",
-            "status": "En cours",
-            "rounds_data": [
-                {
-                    "name": "Round 1",
-                    "start_time": "10/04/2025 13:36",
-                    "end_time": "11/04/2025 22:36",
-                    "matches": [
-                        [
-                            [
-                                "af78965",
-                                1.0
-                            ],
-                            [
-                                "gt12478",
-                                0.0
-                            ]
-                        ],
-                        [
-                            [
-                                "no12587",
-                                0.0
-                            ],
-                            [
-                                "sd12456",
-                                1.0
-                            ]
-                        ],
-                        [
-                            [
-                                "gm14563",
-                                0.5
-                            ],
-                            [
-                                "fe12546",
-                                0.5
-                            ]
-                        ],
-                        [
-                            [
-                                "fr12458",
-                                1.0
-                            ],
-                            [
-                                "xd14587",
-                                0.0
-                            ]
-                        ]
-                    ]
-                },
-                {
-                    "name": "Round 2",
-                    "start_time": "11/04/2025 22:36",
-                    "end_time": "12/04/2025 18:39",
-                    "matches": [
-                        [
-                            [
-                                "sd12456",
-                                0.5
-                            ],
-                            [
-                                "fr12458",
-                                0.5
-                            ]
-                        ],
-                        [
-                            [
-                                "af78965",
-                                1.0
-                            ],
-                            [
-                                "fe12546",
-                                0.0
-                            ]
-                        ],
-                        [
-                            [
-                                "gm14563",
-                                0.0
-                            ],
-                            [
-                                "no12587",
-                                1.0
-                            ]
-                        ],
-                        [
-                            [
-                                "xd14587",
-                                1.0
-                            ],
-                            [
-                                "gt12478",
-                                0.0
-                            ]
-                        ]
-                    ]
-                }
-            ]
-        },
-        "test 2": {
-            "name": "test 2",
-            "location": "caen",
-            "start_date": "12/10/2021",
-            "end_date": "14/10/2025",
-            "rounds": 4,
-            "current_round": 1,
-            "description": "dehfrjr",
-            "players": [
-                "fe12546",
-                "no12587",
-                "sd12456",
-                "xd14587",
-                "fr12458",
-                "gt12478",
-                "gm14563",
-                "af78965"
-            ],
-            "created_at": "2025-04-11 22:12:31",
-            "status": "En cours",
-            "rounds_data": [
-                {
-                    "name": "Round 1",
-                    "start_time": "11/04/2025 22:39",
-                    "end_time": "12/04/2025 18:27",
-                    "matches": [
-                        [
-                            [
-                                "fr12458",
-                                0.0
-                            ],
-                            [
-                                "xd14587",
-                                1.0
-                            ]
-                        ],
-                        [
-                            [
-                                "gm14563",
-                                0.0
-                            ],
-                            [
-                                "no12587",
-                                1.0
-                            ]
-                        ],
-                        [
-                            [
-                                "sd12456",
-                                0.5
-                            ],
-                            [
-                                "af78965",
-                                0.5
-                            ]
-                        ],
-                        [
-                            [
-                                "gt12478",
-                                1.0
-                            ],
-                            [
-                                "fe12546",
-                                0.0
-                            ]
-                        ]
-                    ]
-                }
-            ]
-        },
-        "test4": {
-            "name": "test4",
-            "location": "caen",
-            "start_date": "12/10/2015",
-            "end_date": "13/10/2015",
-            "rounds": 4,
-            "current_round": 0,
-            "description": "caezferzfv",
-            "players": [
-                "gt12478"
-            ],
-            "created_at": "2025-04-11 22:17:23",
-            "status": "Non d\u00e9marr\u00e9"
-        },
-        "demain": {
-            "name": "demain",
-            "location": "cane",
-            "start_date": "12/10/2015",
-            "end_date": "11/04/2025",
-            "rounds": 1,
-            "current_round": 1,
-            "description": "cezcfezf",
-            "players": [
-                "fe12546",
-                "no12587",
-                "sd12456",
-                "xd14587",
-                "fr12458",
-                "gm14563",
-                "af78965",
-                "vf12546"
-            ],
-            "created_at": "2025-04-11 22:55:39",
-            "status": "Termin\u00e9",
-            "rounds_data": [
-                {
-                    "name": "Round 1",
-                    "start_time": "11/04/2025 22:56",
-                    "end_time": "11/04/2025 23:08",
-                    "matches": [
-                        [
-                            [
-                                "gm14563",
-                                1.0
-                            ],
-                            [
-                                "vf12546",
-                                0.0
-                            ]
-                        ],
-                        [
-                            [
-                                "fe12546",
-                                0.5
-                            ],
-                            [
-                                "xd14587",
-                                0.5
-                            ]
-                        ],
-                        [
-                            [
-                                "af78965",
-                                1.0
-                            ],
-                            [
-                                "sd12456",
-                                0.0
-                            ]
-                        ],
-                        [
-                            [
-                                "fr12458",
-                                1.0
-                            ],
-                            [
-                                "no12587",
-                                0.0
-                            ]
-                        ]
-                    ]
-                }
-            ],
-            "final_rankings": [
-                [
-                    "fr12458",
-                    1.0
-                ],
-                [
-                    "gm14563",
-                    1.0
-                ],
-                [
-                    "af78965",
-                    1.0
-                ],
-                [
-                    "fe12546",
-                    0.5
-                ],
-                [
-                    "xd14587",
-                    0.5
-                ],
-                [
-                    "no12587",
-                    0.0
-                ],
-                [
-                    "sd12456",
-                    0.0
-                ],
-                [
-                    "vf12546",
-                    0.0
-                ]
-            ]
-        }
-    },
     "players": {
-        "fe12546": {
-            "last_name": "efzze",
-            "first_name": "zefezf",
-            "birth_date": "01/10/1985",
-            "national_id": "fe12546"
-        },
-        "no12587": {
-            "last_name": "xavier",
-            "first_name": "jeanne",
-            "birth_date": "08/10/1981",
-            "national_id": "no12587"
-        },
-        "sd12456": {
-            "last_name": "jean",
-            "first_name": "claude",
-            "birth_date": "08/10/1981",
-            "national_id": "sd12456"
-        },
-        "xd14587": {
-            "last_name": "bernard",
-            "first_name": "thieerry",
-            "birth_date": "15/10/1985",
-            "national_id": "xd14587"
-        },
-        "fr12458": {
-            "last_name": "marc",
-            "first_name": "amille",
-            "birth_date": "14/10/1981",
-            "national_id": "fr12458"
-        },
-        "gt12478": {
-            "last_name": "guy",
-            "first_name": "jean",
-            "birth_date": "14/08/2012",
-            "national_id": "gt12478"
-        },
-        "gm14563": {
-            "last_name": "la,glade",
-            "first_name": "mathieu",
-            "birth_date": "05/12/2015",
-            "national_id": "gm14563"
-        },
-        "af78965": {
-            "last_name": "heug",
-            "first_name": "kjgflr",
-            "birth_date": "25/10/2015",
-            "national_id": "af78965"
-        },
-        "vf12546": {
+        "sd12547": {
             "last_name": "test",
-            "first_name": "cazx",
-            "birth_date": "12/12/2021",
-            "national_id": "vf12546"
+            "first_name": "michel",
+            "birth_date": "10/12/2025",
+            "national_id": "sd12547"
         },
-        "de12554": {
+        "de14523": {
+            "last_name": "fere",
+            "first_name": "fefez",
+            "birth_date": "10/10/2014",
+            "national_id": "de14523"
+        },
+        "sd14523": {
             "last_name": "test",
             "first_name": "xavier",
-            "birth_date": "10/12/2025",
-            "national_id": "de12554"
+            "birth_date": "12/10/2015",
+            "national_id": "sd14523"
+        },
+        "sd12546": {
+            "last_name": "fehds",
+            "first_name": "dfefezf",
+            "birth_date": "12/10/2015",
+            "national_id": "sd12546"
+        },
+        "fr25254": {
+            "last_name": "gvfez",
+            "first_name": "zefezfg",
+            "birth_date": "12/12/2025",
+            "national_id": "fr25254"
+        },
+        "de12654": {
+            "last_name": "jean",
+            "first_name": "jacquezs",
+            "birth_date": "12/10/2015",
+            "national_id": "de12654"
+        },
+        "de21456": {
+            "last_name": "fre",
+            "first_name": "xavi",
+            "birth_date": "12/12/2015",
+            "national_id": "de21456"
+        },
+        "de12548": {
+            "last_name": "mich",
+            "first_name": "el",
+            "birth_date": "14/10/2024",
+            "national_id": "de12548"
+        }
+    },
+    "tournaments": {
+        "ezf": {
+            "name": "ezf",
+            "location": "caen",
+            "start_date": "10/12/2014",
+            "end_date": "10/01/2015",
+            "rounds": 4,
+            "current_round": 0,
+            "description": "efzefez",
+            "players": [],
+            "created_at": "2025-04-16 18:48:04",
+            "status": "Non d\u00e9marr\u00e9"
+        },
+        "testhd": {
+            "name": "testhd",
+            "location": "caen",
+            "start_date": "12/10/2024",
+            "end_date": "15/10/2025",
+            "rounds": 4,
+            "current_round": 0,
+            "description": "adefzferzg",
+            "players": [],
+            "created_at": "2025-04-16 19:38:34",
+            "status": "Non d\u00e9marr\u00e9"
         }
     }
 }

@@ -80,5 +80,7 @@ class MainController:
         # If switching to rounds view, make sure tournament data is passed
         if view_name == "rounds" :
             self.views["rounds"].show()
-
+        if view_name == "reports" :
+            self.views["reports"].refresh_data()
+            
         self.views[view_name].tkraise()

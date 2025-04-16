@@ -32,4 +32,5 @@ class HomeController:
 
     def show_reports(self):
         """Navigate to reports management view"""
+        # First show the reports view
         self.master_controller.show_view("reports")

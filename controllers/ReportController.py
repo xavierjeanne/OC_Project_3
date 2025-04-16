@@ -401,13 +401,13 @@ class ReportController:
 
         # Format for display
         result = []
-        for rank, (player_id, points) in enumerate(sorted_players, 1):
+        for rank, (player_id, scores) in enumerate(sorted_players, 1):
             player_data = players_data.get(player_id, {})
             result.append({
                 'rank': rank,
                 'last_name': player_data.get('last_name', ''),
                 'first_name': player_data.get('first_name', ''),
-                'points': points
+                'score': scores
             })
 
         return {
