@@ -17,10 +17,12 @@ class HomeView(ttk.Frame):
             - Tournament management button
             - Custom styling and cursor effects
         """
-        super().__init__(parent, style='Main.TFrame')
+        super().__init__(parent,
+                         style='Main.TFrame')
 
         # Buttons
-        btn_frame = ttk.Frame(self, style='Main.TFrame')
+        btn_frame = ttk.Frame(self,
+                              style='Main.TFrame')
         btn_frame.pack(expand=True)
 
         ttk.Button(
@@ -30,6 +32,7 @@ class HomeView(ttk.Frame):
             style='Custom.TButton',
             cursor='hand2'
             ).pack(pady=10)
+
         ttk.Button(
             btn_frame,
             text="Gestion des Tournois",
@@ -37,6 +40,7 @@ class HomeView(ttk.Frame):
             style='Custom.TButton',
             cursor='hand2'
             ).pack(pady=10)
+
         ttk.Button(
             btn_frame,
             text="Rapports",

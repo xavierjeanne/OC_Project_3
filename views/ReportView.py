@@ -79,8 +79,6 @@ class ReportView(ttk.Frame):
 
         self.grid_rowconfigure(1, weight=1)
         self.grid_columnconfigure(0, weight=1)
-        
-      
 
     def _setup_players_tab(self):
         """Set up the tab for displaying all players alphabetically"""
@@ -510,8 +508,7 @@ class ReportView(ttk.Frame):
         tournament_name = self.scores_selector.get()
 
         # Let controller handle validation and data retrieval
-        result = (self.
-                  callbacks.get('get_tournament_standings_for_display')
+        result = (self.callbacks.get('get_tournament_standings_for_display')
                   (tournament_name))
 
         if not result['success']:

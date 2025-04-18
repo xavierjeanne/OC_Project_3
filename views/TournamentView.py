@@ -14,7 +14,8 @@ class TournamentView(ttk.Frame):
             callbacks: Dictionary containing
             callback functions for tournament operations
         """
-        super().__init__(parent, style='Main.TFrame')
+        super().__init__(parent,
+                         style='Main.TFrame')
         self.callbacks = callbacks
         self.edit_mode = False
         # Return button
@@ -22,24 +23,37 @@ class TournamentView(ttk.Frame):
                    text="Retour à l'accueil",
                    command=self.callbacks.get('return_home'),
                    cursor='hand2',
-                   style='Custom.TButton').grid(row=0, column=0, pady=10)
+                   style='Custom.TButton').grid(row=0,
+                                                column=0,
+                                                pady=10)
 
         # Create notebook
-        self.notebook = ttk.Notebook(self, style='Custom.TNotebook')
-        self.notebook.grid(row=1, column=0, sticky='nsew', padx=10, pady=10)
+        self.notebook = ttk.Notebook(self,
+                                     style='Custom.TNotebook')
+        self.notebook.grid(row=1,
+                           column=0,
+                           sticky='nsew',
+                           padx=10,
+                           pady=10)
 
         # Create tournament tab
-        self.add_tournament_frame = ttk.Frame(self.notebook, style='Main.TFrame')
-        self.notebook.add(self.add_tournament_frame, text="Ajouter un Tournoi")
+        self.add_tournament_frame = ttk.Frame(self.notebook,
+                                              style='Main.TFrame')
+        self.notebook.add(self.add_tournament_frame,
+                          text="Ajouter un Tournoi")
         self._setup_add_tournament_tab()
 
         # Tournament list tab
-        self.list_tournaments_frame = ttk.Frame(self.notebook, style='Main.TFrame')
-        self.notebook.add(self.list_tournaments_frame, text="Liste des Tournois")
+        self.list_tournaments_frame = ttk.Frame(self.notebook,
+                                                style='Main.TFrame')
+        self.notebook.add(self.list_tournaments_frame,
+                          text="Liste des Tournois")
         self._setup_list_tournaments_tab()
 
-        self.grid_rowconfigure(1, weight=1)
-        self.grid_columnconfigure(0, weight=1)
+        self.grid_rowconfigure(1,
+                               weight=1)
+        self.grid_columnconfigure(0,
+                                  weight=1)
 
     def _setup_add_tournament_tab(self):
         """Set up the tab for creating new tournaments
@@ -52,9 +66,12 @@ class TournamentView(ttk.Frame):
         - Description
         """
         for i in range(7):
-            self.add_tournament_frame.grid_rowconfigure(i, weight=1)
-            self.add_tournament_frame.grid_columnconfigure(0, weight=1)
-            self.add_tournament_frame.grid_columnconfigure(1, weight=2)
+            self.add_tournament_frame.grid_rowconfigure(i,
+                                                        weight=1)
+            self.add_tournament_frame.grid_columnconfigure(0,
+                                                           weight=1)
+            self.add_tournament_frame.grid_columnconfigure(1,
+                                                           weight=2)
 
         fields = [
             ("Nom du tournoi:", "name"),
@@ -75,16 +92,26 @@ class TournamentView(ttk.Frame):
                                                   padx=10,
                                                   pady=10)
             if field_name == "description":
-                entry = tk.Text(self.add_tournament_frame, height=2, width=30)
+                entry = tk.Text(self.add_tournament_frame,
+                                height=2,
+                                width=30)
             else:
-                entry = ttk.Entry(self.add_tournament_frame, width=40)
-            entry.grid(row=idx, column=1, sticky='w', padx=10, pady=10)
+                entry = ttk.Entry(self.add_tournament_frame,
+                                  width=40)
+            entry.grid(row=idx,
+                       column=1,
+                       sticky='w',
+                       padx=10,
+                       pady=10)
             self.entries[field_name] = entry
 
         ttk.Button(self.add_tournament_frame,
                    text="Enregistrer",
                    command=self.save_tournament,
-                   style='Custom.TButton').grid(row=7, column=0, columnspan=2, pady=20)
+                   style='Custom.TButton').grid(row=7,
+                                                column=0,
+                                                columnspan=2,
+                                                pady=20)
 
     # In the _setup_list_tournaments_tab method, modify the tournament list display
 
@@ -96,11 +123,18 @@ class TournamentView(ttk.Frame):
         - Player addition functionality
         - Tournament start option
         """
-        self.list_tournaments_frame.grid_rowconfigure(0, weight=1)
-        self.list_tournaments_frame.grid_columnconfigure(0, weight=1)
+        self.list_tournaments_frame.grid_rowconfigure(0,
+                                                      weight=1)
+        self.list_tournaments_frame.grid_columnconfigure(0,
+                                                         weight=1)
 
         # Update columns to include status
-        columns = ("name", "location", "status", "start_date", "players", "edit")
+        columns = ("name",
+                   "location",
+                   "status",
+                   "start_date",
+                   "players",
+                   "edit")
         self.tournaments_table = ttk.Treeview(self.list_tournaments_frame,
                                               columns=columns,
                                               show='headings',
@@ -117,26 +151,44 @@ class TournamentView(ttk.Frame):
 
         for col, text in headers.items():
             if col == "edit":
-                self.tournaments_table.heading(col, text=text, anchor='center')
-                self.tournaments_table.column(col, width=70 , anchor='center')
+                self.tournaments_table.heading(col,
+                                               text=text,
+                                               anchor='center')
+                self.tournaments_table.column(col,
+                                              width=70 ,
+                                              anchor='center')
             else:
-                self.tournaments_table.heading(col, text=text, anchor='nw')
-                self.tournaments_table.column(col, width=150)
+                self.tournaments_table.heading(col,
+                                               text=text,
+                                               anchor='nw')
+                self.tournaments_table.column(col,
+                                              width=150)
 
         # Add click event binding
-        self.tournaments_table.bind('<ButtonRelease-1>', self.handle_click)
+        self.tournaments_table.bind('<ButtonRelease-1>',
+                                    self.handle_click)
 
-        self.tournaments_table.grid(row=0, column=0, sticky='nsew', padx=10, pady=10)
+        self.tournaments_table.grid(row=0,
+                                    column=0,
+                                    sticky='nsew',
+                                    padx=10,
+                                    pady=10)
         # Add scrollbar
         scrollbar = ttk.Scrollbar(self.list_tournaments_frame,
                                   orient=tk.VERTICAL,
                                   command=self.tournaments_table.yview)
         self.tournaments_table.configure(yscroll=scrollbar.set)
-        scrollbar.grid(row=0, column=1, sticky='ns')
+        scrollbar.grid(row=0,
+                       column=1,
+                       sticky='ns')
 
         # Buttons frame
-        btn_frame = ttk.Frame(self.list_tournaments_frame, style='Main.TFrame')
-        btn_frame.grid(row=1, column=0, columnspan=2, pady=10)
+        btn_frame = ttk.Frame(self.list_tournaments_frame,
+                              style='Main.TFrame')
+        btn_frame.grid(row=1,
+                       column=0,
+                       columnspan=2,
+                       pady=10)
 
         ttk.Button(btn_frame,
                    text="Ajouter des joueurs",
@@ -160,24 +212,28 @@ class TournamentView(ttk.Frame):
         }
 
         # Add the original name if in edit mode
-        if self.edit_mode and hasattr(self, 'current_tournament_name'):
+        if self.edit_mode and hasattr(self,
+                                      'current_tournament_name'):
             tournament_data["original_name"] = self.current_tournament_name
 
         success, message = self.callbacks.get('save_tournament')(tournament_data,
                                                                  self.edit_mode)
         if success:
-            messagebox.showinfo("Succès", message)
+            messagebox.showinfo("Succès",
+                                message)
             self.reset_form()
             self.load_tournaments()
             self.notebook.select(1)
         else:
-            messagebox.showerror("Erreur", message)
+            messagebox.showerror("Erreur",
+                                 message)
 
     def reset_form(self):
         """Reset the form to its initial state"""
         for field, entry in self.entries.items():
             if field == "description":
-                entry.delete("1.0", tk.END)
+                entry.delete("1.0",
+                             tk.END)
             else:
                 entry.delete(0, tk.END)
 
@@ -186,7 +242,8 @@ class TournamentView(ttk.Frame):
 
     def handle_click(self, event):
         """Handle click events on the tournaments table"""
-        region = self.tournaments_table.identify_region(event.x, event.y)
+        region = self.tournaments_table.identify_region(event.x,
+                                                        event.y)
         if region == "cell":
             item = self.tournaments_table.selection()[0]
             column = self.tournaments_table.identify_column(event.x)
@@ -211,13 +268,17 @@ class TournamentView(ttk.Frame):
         # Fill the form fields
         for field in ["name", "location", "start_date", "end_date", "rounds"]:
             if field in self.entries and field in tournament_data:
-                self.entries[field].delete(0, tk.END)
-                self.entries[field].insert(0, tournament_data[field])
+                self.entries[field].delete(0,
+                                           tk.END)
+                self.entries[field].insert(0,
+                                           tournament_data[field])
 
         # Handle the description text widget separately
         if "description" in self.entries and "description" in tournament_data:
-            self.entries["description"].delete("1.0", tk.END)
-            self.entries["description"].insert("1.0", tournament_data["description"])
+            self.entries["description"].delete("1.0",
+                                               tk.END)
+            self.entries["description"].insert("1.0",
+                                               tournament_data["description"])
 
         # Update UI to reflect edit mode
         self.edit_mode = True
@@ -235,7 +296,8 @@ class TournamentView(ttk.Frame):
         tournaments = self.callbacks.get('load_tournaments')()
         for name, tournament_data in tournaments.items():
             # Get status with default value if not present
-            status = tournament_data.get("status", "Non démarré")
+            status = tournament_data.get("status",
+                                         "Non démarré")
 
             self.tournaments_table.insert(
                 "",
@@ -287,7 +349,10 @@ class TournamentView(ttk.Frame):
         self.selection_window.geometry("400x500")
 
         players_frame = ttk.Frame(self.selection_window)
-        players_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        players_frame.pack(fill=tk.BOTH,
+                           expand=True,
+                           padx=10,
+                           pady=10)
 
         players = self.callbacks.get('load_available_players')()
 
@@ -330,7 +395,8 @@ class TournamentView(ttk.Frame):
                            'selection_window') and self.selection_window.winfo_exists():
                     self.selection_window.destroy()
                 else:
-                    messagebox.showerror("Erreur", message)
+                    messagebox.showerror("Erreur",
+                                         message)
         else:
             messagebox.showwerror("Aucun joueur sélectionné",
                                   "Veuillez sélectionner au moins un joueur")

@@ -16,7 +16,8 @@ class DataManager:
         """
         self.filepath = Path(filepath)
         # Ensure the file exists, create if not
-        self.filepath.parent.mkdir(parents=True, exist_ok=True)
+        self.filepath.parent.mkdir(parents=True,
+                                   exist_ok=True)
         if not self.filepath.exists():
             self.save_data({"players": {}, "tournaments": {}})
 
@@ -26,7 +27,9 @@ class DataManager:
         Returns:
             dict: Dictionary containing all application data
         """
-        with open(self.filepath, 'r', encoding="utf-8") as file:
+        with open(self.filepath,
+                  'r',
+                  encoding="utf-8") as file:
             return json.load(file)
 
     def save_data(self, data):
@@ -35,16 +38,25 @@ class DataManager:
         Args:
             data (dict): Data to be saved
         """
-        with open(self.filepath, "w", encoding="utf-8") as file:
-            json.dump(data, file, indent=4)
+        with open(self.filepath,
+                  "w",
+                  encoding="utf-8") as file:
+            json.dump(data,
+                      file,
+                      indent=4)
 
     def save_tournament(self, tournament):
         """Save a tournament to the database
 
         Args:
-            tournament (Tournament): Tournament object to save
+            tournament: Tournament object to save
         """
         data = self.load_data()
+
+        # Initialize tournaments dictionary if it doesn't exist
+        if "tournaments" not in data:
+            data["tournaments"] = {}
+
         data["tournaments"][tournament.name] = tournament.to_dict()
         self.save_data(data)
 
@@ -89,3 +101,19 @@ class DataManager:
         return Player.from_dict(
             data["players"]
             .get(national_id)) if national_id in data['players'] else None
+
+    def delete_player(self, national_id):
+        """Delete a player from the database
+
+        Args:
+            national_id (str): National ID of the player to delete
+        Returns:
+            bool: True if player was deleted, False if not found
+        """
+        data = self.load_data()
+
+        if "players" in data and national_id in data["players"]:
+            del data["players"][national_id]
+            self.save_data(data)
+            return True
+        return False

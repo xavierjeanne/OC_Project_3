@@ -10,7 +10,8 @@ class Match:
             score1 (float): Score of first player (default: 0.0)
             score2 (float): Score of second player (default: 0.0)
         """
-        self.match = [(player1, score1), (player2, score2)]
+        self.match = [(player1, score1),
+                      (player2, score2)]
 
     def to_dict(self):
         """Convert match data to dictionary format for storage
@@ -18,7 +19,8 @@ class Match:
         Returns:
             dict: Match data in dictionary format
         """
-        return {"player1": self.match[0], "player2": self.match[1]}
+        return {"player1": self.match[0],
+                "player2": self.match[1]}
 
     @classmethod
     def from_dict(cls, data):

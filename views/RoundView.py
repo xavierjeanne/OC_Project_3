@@ -13,7 +13,8 @@ class RoundView(ttk.Frame):
             parent: Parent widget containing this view
             callbacks: Dictionary containing callback functions for round operations
         """
-        super().__init__(parent, style='Main.TFrame')
+        super().__init__(parent,
+                         style='Main.TFrame')
         self.callbacks = callbacks
         self.tournament_data = None
 
@@ -25,25 +26,38 @@ class RoundView(ttk.Frame):
                    style='Custom.TButton').grid(row=0, column=0, pady=10)
 
         # Create notebook
-        self.notebook = ttk.Notebook(self, style='Custom.TNotebook')
-        self.notebook.grid(row=1, column=0, sticky='nsew', padx=10, pady=10)
+        self.notebook = ttk.Notebook(self,
+                                     style='Custom.TNotebook')
+        self.notebook.grid(row=1,
+                           column=0,
+                           sticky='nsew',
+                           padx=10,
+                           pady=10)
 
         # round list tab
-        self.list_rounds_frame = ttk.Frame(self.notebook, style='Main.TFrame')
-        self.notebook.add(self.list_rounds_frame, text="Liste des tours")
+        self.list_rounds_frame = ttk.Frame(self.notebook,
+                                           style='Main.TFrame')
+        self.notebook.add(self.list_rounds_frame,
+                          text="Liste des tours")
         self._setup_list_rounds_tab()
 
         # Create round tab
-        self.list_scores_frame = ttk.Frame(self.notebook, style='Main.TFrame')
-        self.notebook.add(self.list_scores_frame, text="Score des matchs")
+        self.list_scores_frame = ttk.Frame(self.notebook,
+                                           style='Main.TFrame')
+        self.notebook.add(self.list_scores_frame,
+                          text="Score des matchs")
         self._setup_list_scores_tab()
 
-        self.ranking_frame = ttk.Frame(self.notebook, style='Main.TFrame')
-        self.notebook.add(self.ranking_frame, text="Classement des joueurs")
+        self.ranking_frame = ttk.Frame(self.notebook,
+                                       style='Main.TFrame')
+        self.notebook.add(self.ranking_frame,
+                          text="Classement des joueurs")
         self._setup_ranking_tab()
 
-        self.grid_rowconfigure(1, weight=1)
-        self.grid_columnconfigure(0, weight=1)
+        self.grid_rowconfigure(1,
+                               weight=1)
+        self.grid_columnconfigure(0,
+                                  weight=1)
 
         # Don't load tournament data immediately
         # We'll load it when the view is shown
@@ -75,11 +89,16 @@ class RoundView(ttk.Frame):
 
     def _setup_list_rounds_tab(self):
         """Set up the tab for displaying and managing rounds"""
-        self.list_rounds_frame.grid_rowconfigure(0, weight=1)
-        self.list_rounds_frame.grid_columnconfigure(0, weight=1)
+        self.list_rounds_frame.grid_rowconfigure(0,
+                                                 weight=1)
+        self.list_rounds_frame.grid_columnconfigure(0,
+                                                    weight=1)
 
         # Create rounds table
-        columns = ("name", "start_time", "end_time", "status")
+        columns = ("name",
+                   "start_time",
+                   "end_time",
+                   "status")
         self.rounds_table = ttk.Treeview(self.list_rounds_frame,
                                          columns=columns,
                                          show='headings',
@@ -93,39 +112,60 @@ class RoundView(ttk.Frame):
         }
 
         for col, text in headers.items():
-            self.rounds_table.heading(col, text=text, anchor='nw')
-            self.rounds_table.column(col, width=150)
+            self.rounds_table.heading(col,
+                                      text=text,
+                                      anchor='nw')
+            self.rounds_table.column(col,
+                                     width=150)
 
-        self.rounds_table.grid(row=0, column=0, sticky='nsew', padx=10, pady=10)
+        self.rounds_table.grid(row=0,
+                               column=0,
+                               sticky='nsew',
+                               padx=10,
+                               pady=10)
 
         # Add scrollbar
         scrollbar = ttk.Scrollbar(self.list_rounds_frame,
                                   orient=tk.VERTICAL,
                                   command=self.rounds_table.yview)
         self.rounds_table.configure(yscroll=scrollbar.set)
-        scrollbar.grid(row=0, column=1, sticky='ns')
+        scrollbar.grid(row=0,
+                       column=1,
+                       sticky='ns')
 
         # Buttons frame
-        btn_frame = ttk.Frame(self.list_rounds_frame, style='Main.TFrame')
-        btn_frame.grid(row=1, column=0, columnspan=2, pady=10)
+        btn_frame = ttk.Frame(self.list_rounds_frame,
+                              style='Main.TFrame')
+        btn_frame.grid(row=1,
+                       column=0,
+                       columnspan=2,
+                       pady=10)
 
         ttk.Button(btn_frame,
                    text="Créer un nouveau tour",
                    command=self.create_new_round,
-                   style='Custom.TButton').pack(side=tk.LEFT, padx=5)
+                   style='Custom.TButton').pack(side=tk.LEFT,
+                                                padx=5)
 
         ttk.Button(btn_frame,
                    text="Terminer le tour sélectionné",
                    command=self.finish_selected_round,
-                   style='Custom.TButton').pack(side=tk.LEFT, padx=5)
+                   style='Custom.TButton').pack(side=tk.LEFT,
+                                                padx=5)
 
     def _setup_list_scores_tab(self):
         """Set up the tab for managing match scores"""
-        self.list_scores_frame.grid_rowconfigure(0, weight=1)
-        self.list_scores_frame.grid_columnconfigure(0, weight=1)
+        self.list_scores_frame.grid_rowconfigure(0,
+                                                 weight=1)
+        self.list_scores_frame.grid_columnconfigure(0,
+                                                    weight=1)
 
         # Create matches table
-        columns = ("round", "player1", "score1", "player2", "score2")
+        columns = ("round",
+                   "player1",
+                   "score1",
+                   "player2",
+                   "score2")
         self.matches_table = ttk.Treeview(self.list_scores_frame,
                                           columns=columns,
                                           show='headings',
@@ -140,38 +180,58 @@ class RoundView(ttk.Frame):
         }
 
         for col, text in headers.items():
-            self.matches_table.heading(col, text=text, anchor='nw')
+            self.matches_table.heading(col,
+                                       text=text,
+                                       anchor='nw')
             if col in ["score1", "score2"]:
-                self.matches_table.column(col, width=50, anchor='center')
+                self.matches_table.column(col,
+                                          width=50,
+                                          anchor='center')
             else:
-                self.matches_table.column(col, width=150)
+                self.matches_table.column(col,
+                                          width=150)
 
-        self.matches_table.grid(row=0, column=0, sticky='nsew', padx=10, pady=10)
+        self.matches_table.grid(row=0,
+                                column=0,
+                                sticky='nsew',
+                                padx=10,
+                                pady=10)
 
         # Add scrollbar
         scrollbar = ttk.Scrollbar(self.list_scores_frame,
                                   orient=tk.VERTICAL,
                                   command=self.matches_table.yview)
         self.matches_table.configure(yscroll=scrollbar.set)
-        scrollbar.grid(row=0, column=1, sticky='ns')
+        scrollbar.grid(row=0,
+                       column=1,
+                       sticky='ns')
 
         # Buttons frame
-        btn_frame = ttk.Frame(self.list_scores_frame, style='Main.TFrame')
-        btn_frame.grid(row=1, column=0, columnspan=2, pady=10)
+        btn_frame = ttk.Frame(self.list_scores_frame,
+                              style='Main.TFrame')
+        btn_frame.grid(row=1,
+                       column=0,
+                       columnspan=2,
+                       pady=10)
 
         ttk.Button(btn_frame,
                    text="Mettre à jour les scores",
                    command=self.update_match_scores,
-                   style='Custom.TButton').pack(side=tk.LEFT, padx=5)
+                   style='Custom.TButton').pack(side=tk.LEFT,
+                                                padx=5)
         self.load_matches()  # Load matches when the view is shown
 
     def _setup_ranking_tab(self):
         """Set up the tab for displaying player rankings"""
-        self.ranking_frame.grid_rowconfigure(0, weight=1)
-        self.ranking_frame.grid_columnconfigure(0, weight=1)
+        self.ranking_frame.grid_rowconfigure(0,
+                                             weight=1)
+        self.ranking_frame.grid_columnconfigure(0,
+                                                weight=1)
 
         # Create rankings table
-        columns = ("rank", "player", "points")
+        columns = ("rank",
+                   "player",
+                   "points")
         self.rankings_table = ttk.Treeview(self.ranking_frame,
                                            columns=columns,
                                            show='headings',
@@ -184,36 +244,54 @@ class RoundView(ttk.Frame):
         }
 
         for col, text in headers.items():
-            self.rankings_table.heading(col, text=text, anchor='nw')
+            self.rankings_table.heading(col,
+                                        text=text,
+                                        anchor='nw')
             if col == "rank":
-                self.rankings_table.column(col, width=50, anchor='center')
+                self.rankings_table.column(col,
+                                           width=50,
+                                           anchor='center')
             elif col == "points":
-                self.rankings_table.column(col, width=100, anchor='center')
+                self.rankings_table.column(col,
+                                           width=100,
+                                           anchor='center')
             else:
-                self.rankings_table.column(col, width=250)
+                self.rankings_table.column(col,
+                                           width=250)
 
-        self.rankings_table.grid(row=0, column=0, sticky='nsew', padx=10, pady=10)
+        self.rankings_table.grid(row=0,
+                                 column=0,
+                                 sticky='nsew',
+                                 padx=10,
+                                 pady=10)
 
         # Add scrollbar
         scrollbar = ttk.Scrollbar(self.ranking_frame,
                                   orient=tk.VERTICAL,
                                   command=self.rankings_table.yview)
         self.rankings_table.configure(yscroll=scrollbar.set)
-        scrollbar.grid(row=0, column=1, sticky='ns')
+        scrollbar.grid(row=0,
+                       column=1,
+                       sticky='ns')
 
         # Refresh button
-        button_frame = ttk.Frame(self.ranking_frame, style='Main.TFrame')
-        button_frame.grid(row=1, column=0, pady=10)
+        button_frame = ttk.Frame(self.ranking_frame,
+                                 style='Main.TFrame')
+        button_frame.grid(row=1,
+                          column=0,
+                          pady=10)
 
         ttk.Button(button_frame,
                    text="Rafraîchir le classement",
                    command=self.update_rankings,
-                   style='Custom.TButton').pack(side=tk.LEFT, padx=5)
+                   style='Custom.TButton').pack(side=tk.LEFT,
+                                                padx=5)
 
         ttk.Button(button_frame,
                    text="Terminer le tournoi",
                    command=self.finish_tournament,
-                   style='Custom.TButton').pack(side=tk.LEFT, padx=5)
+                   style='Custom.TButton').pack(side=tk.LEFT,
+                                                padx=5)
 
         self.load_player_rankings()  # Load rankings when the view is shown
 
@@ -230,7 +308,8 @@ class RoundView(ttk.Frame):
         for item in self.rounds_table.get_children():
             self.rounds_table.delete(item)
 
-        rounds_data = self.tournament_data.get('rounds_data', [])
+        rounds_data = self.tournament_data.get('rounds_data',
+                                               [])
 
         for round_data in rounds_data:
             status = "Terminé" if round_data.get('end_time') else "En cours"
@@ -307,7 +386,9 @@ class RoundView(ttk.Frame):
             player_names = self.callbacks.get('get_player_names')()
 
         # Sort players by points
-        sorted_players = sorted(player_points.items(), key=lambda x: x[1], reverse=True)
+        sorted_players = sorted(player_points.items(),
+                                key=lambda x: x[1],
+                                reverse=True)
 
         # Display rankings
         for rank, (player_id, points) in enumerate(sorted_players, 1):
@@ -337,7 +418,8 @@ class RoundView(ttk.Frame):
         """Mark the selected round as finished"""
         selection = self.rounds_table.selection()
         if not selection:
-            messagebox.showwarning("Avertissement", "Veuillez sélectionner un tour")
+            messagebox.showwarning("Avertissement",
+                                   "Veuillez sélectionner un tour")
             return
 
         item = selection[0]
@@ -345,16 +427,19 @@ class RoundView(ttk.Frame):
 
         success, message = self.callbacks.get('finish_round')(round_name)
         if success:
-            messagebox.showinfo("Succès", message)
+            messagebox.showinfo("Succès",
+                                message)
             self.load_tournament_data()
         else:
-            messagebox.showerror("Erreur", message)
+            messagebox.showerror("Erreur",
+                                 message)
 
     def update_match_scores(self):
         """Open a dialog to update scores for the selected match"""
         selection = self.matches_table.selection()
         if not selection:
-            messagebox.showwarning("Avertissement", "Veuillez sélectionner un match")
+            messagebox.showwarning("Avertissement",
+                                   "Veuillez sélectionner un match")
             return
 
         item = selection[0]
@@ -377,12 +462,18 @@ class RoundView(ttk.Frame):
         score_frame.pack(pady=10)
 
         ttk.Label(score_frame,
-                  text=f"{values[1]}:").grid(row=0, column=0, padx=5, pady=5)
+                  text=f"{values[1]}:").grid(row=0,
+                                             column=0,
+                                             padx=5,
+                                             pady=5)
         score1_var = tk.StringVar(value=values[2])
         score1_combo = ttk.Combobox(score_frame,
                                     textvariable=score1_var,
                                     values=["0", "0.5", "1"], width=5)
-        score1_combo.grid(row=0, column=1, padx=5, pady=5)
+        score1_combo.grid(row=0,
+                          column=1,
+                          padx=5,
+                          pady=5)
 
         ttk.Label(score_frame, text=f"{values[3]}:").grid(row=1,
                                                           column=0,
@@ -393,7 +484,10 @@ class RoundView(ttk.Frame):
                                     textvariable=score2_var,
                                     values=["0", "0.5", "1"],
                                     width=5)
-        score2_combo.grid(row=1, column=1, padx=5, pady=5)
+        score2_combo.grid(row=1,
+                          column=1,
+                          padx=5,
+                          pady=5)
 
         # Store variables in instance for access in save_scores
         self.score1_var = score1_var
@@ -402,7 +496,8 @@ class RoundView(ttk.Frame):
         self.current_player1_id = player1_id
         self.current_player2_id = player2_id
 
-        ttk.Button(self.score_dialog, text="Enregistrer",
+        ttk.Button(self.score_dialog,
+                   text="Enregistrer",
                    command=self.save_scores).pack(pady=10)
 
     def save_scores(self):
@@ -452,10 +547,13 @@ class RoundView(ttk.Frame):
             success, message = self.callbacks.get('finish_tournament')()
 
             if success:
-                messagebox.showinfo("Succès", message)
+                messagebox.showinfo("Succès",
+                                    message)
                 # Return to tournament list after finishing
                 self.callbacks.get('return_list_tournament')()
             else:
-                messagebox.showerror("Erreur", message)
+                messagebox.showerror("Erreur",
+                                     message)
         else:
-            messagebox.showerror("Erreur", "Fonction non disponible")
+            messagebox.showerror("Erreur",
+                                 "Fonction non disponible")

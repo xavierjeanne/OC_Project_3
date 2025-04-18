@@ -36,13 +36,16 @@ class PlayerController:
                 - first_name: Player's first name
                 - birth_date: Player's birth date
                 - national_id: Player's national ID
+            edit_mode (bool): Whether we're editing an existing player
 
         Returns:
             tuple: (success: bool, message: str)
         """
         # Data validation
-        if not all([player_data["last_name"], player_data["first_name"],
-                    player_data["birth_date"], player_data["national_id"]]):
+        if not all([player_data["last_name"],
+                    player_data["first_name"],
+                    player_data["birth_date"],
+                    player_data["national_id"]]):
             return False, "Tous les champs sont obligatoires."
 
         # Validate national ID format
@@ -76,14 +79,22 @@ class PlayerController:
             return False, "Format de date invalide. Utilisez JJ/MM/AAAA"
 
         # Create and save the new player
-        player = Player(player_data["last_name"], player_data["first_name"],
-                        player_data["birth_date"], player_data["national_id"])
+        player = Player(player_data["last_name"],
+                        player_data["first_name"],
+                        player_data["birth_date"],
+                        player_data["national_id"])
+        # If we're editing and the ID has changed, remove the old player entry
+        if (edit_mode and
+                "original_id" in player_data and
+                player_data["original_id"] != player_data["national_id"]):
+            self.data_manager.delete_player(player_data["original_id"])
         self.data_manager.save_player(player)
+
         if edit_mode:
-            success_message = (f"Le joueur '{player_data['first_name']}'"
+            success_message = (f"Le joueur '{player_data['first_name']}' "
                                f"mis à jour avec succès")
         else:
-            success_message = (f"Le joueur '{player_data['first_name']}'"
+            success_message = (f"Le joueur '{player_data['first_name']}' "
                                f"créé avec succès")
         return True, success_message
 

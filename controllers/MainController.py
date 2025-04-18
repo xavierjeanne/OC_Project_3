@@ -82,5 +82,5 @@ class MainController:
             self.views["rounds"].show()
         if view_name == "reports" :
             self.views["reports"].refresh_data()
-            
+
         self.views[view_name].tkraise()
