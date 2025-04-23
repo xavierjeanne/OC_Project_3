@@ -16,19 +16,23 @@ Ce projet consiste à créer une application logiciel de gestion de tournoi d'é
 ## Installation
 
 1. Clonez ce dépôt :
-    Dans un terminal, exécuter la commande suivante : 
-    git clone https://github.com/xavierjeanne/OC_Project_3.git
+   Dans un terminal, exécuter la commande suivante : 
+   git clone https://github.com/xavierjeanne/OC_Project_3.git
 
 2. Accéder au répertoire du projet :
-    cd Oc_project_3
+   cd Oc_project_3
 
 3. Créer un environnement virtuel, l'activer puis installer les dépendances :
-    python -m venv env
-    source env\Scripts\activate
-    pip install -r requirements.txt
+   python -m venv env
+   source env\Scripts\activate
+   pip install -r requirements.txt
 
 4. Executer le script :
-    python main.py
+   python main.py
+
+5. Pour générer un rapport flake8 en html 
+   flake8 --format=html --htmldir=flake-report
+   le rapport se retouve dans le dossier flake-report (index.html)
 
 ## Utilisation de l'application
 
@@ -56,9 +60,9 @@ Après avoir lancé l'application, vous accéderez au menu principal qui propose
    - Remplissez les informations du tournoi (Nom, Lieu, Dates, Nombre de tours, Description)
    - Cliquez sur "Enregistrer"
 3. Pour ajouter des joueurs à un tournoi :
-   - Sélectionnez un tournoi dans la liste
+   - Sélectionnez un tournoi dans la liste en cliquant sur une ligne du tableau
    - Cliquez sur "Ajouter des joueurs"
-   - Cochez les joueurs à ajouter
+   - Cochez les joueurs à ajouter (minimum 8)
    - Cliquez sur "Mettre à jour les joueurs"
 4. Pour gérer un tournoi :
    - Sélectionnez un tournoi dans la liste
@@ -71,7 +75,7 @@ Après avoir lancé l'application, vous accéderez au menu principal qui propose
    - Sélectionnez le tour dans la liste
    - Cliquez sur "Terminer le tour sélectionné"
 3. Pour mettre à jour les scores d'un match :
-   - Sélectionnez un match dans la liste
+   - Sélectionnez un match dans la liste en cliquant sur une ligne du tableau
    - Cliquez sur "Mettre à jour les scores"
    - Entrez les scores (0, 0.5 ou 1)
    - Cliquez sur "Enregistrer"
